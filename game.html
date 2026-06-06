@@ -2896,8 +2896,7 @@ function showWelcome(){
 }
 
 function onWelcomeStart(){
-  sndBtnPlay();       // звук кнопки
-  sndSplash();        // звук интро — теперь после касания, сработает!
+  sndSplash();        // звук интро — после касания, сработает!
   const sw=document.getElementById('swelcome');
   sw.style.transition='opacity .35s ease';
   sw.style.opacity='0';
@@ -2905,13 +2904,7 @@ function onWelcomeStart(){
 }
 
 function initSplash(){
-  showScr('spl');
-  setTimeout(()=>{
-    const spl=document.getElementById('spl');
-    spl.style.transition='opacity .35s ease';
-    spl.style.opacity='0';
-    setTimeout(()=>showWelcome(),370);
-  },1800);
+  showWelcome();
 }
 
 applyTheme();
