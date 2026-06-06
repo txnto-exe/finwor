@@ -765,16 +765,16 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
     <div class="m-title">FinWor</div>
     <div class="m-sub">🧩 словесная головоломка</div>
     <div class="m-coins">🪙 <span id="m-cval">0</span></div>
-    <button class="mbtn mbtn-p" onclick="doPlay()">🎮 Играть</button>
-    <button class="mbtn mbtn-s" onclick="doLevels()">🗺️ Выбор уровня</button>
-    <button class="mbtn-icon" onclick="doStats()">📊 Статистика</button>
+    <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
+    <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
+    <button class="mbtn-icon" onclick="sndBtnStats();doStats()">📊 Статистика</button>
   </div>
 </div>
 
 <!-- ══ ВЫБОР УРОВНЯ ══════════════════════════════════════════ -->
 <div id="slvl" class="sovr hid">
   <div class="slvl-hdr">
-    <button class="shbk" onclick="doMenu()">←</button>
+    <button class="shbk" onclick="sndBtnBack();doMenu()">←</button>
     <span class="slvl-ttl">Уровни</span>
     <span class="slvl-coins">🪙 <span id="sl-cval">0</span></span>
   </div>
@@ -784,7 +784,7 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 <!-- ══ СТАТИСТИКА ══════════════════════════════════════════ -->
 <div id="sstats" class="sovr hid">
   <div class="slvl-hdr">
-    <button class="shbk" onclick="doMenu()">←</button>
+    <button class="shbk" onclick="sndBtnBack();doMenu()">←</button>
     <span class="slvl-ttl">Статистика</span>
   </div>
   <div class="stats-body">
@@ -878,7 +878,7 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 <div id="vignette"></div><div id="ms"><b>+30 🪙</b><small>20 слов в архиве!</small></div>
 
 <header>
-  <button class="hbk" onclick="doMenu()">←</button>
+  <button class="hbk" onclick="sndBtnBack();doMenu()">←</button>
   <span class="logo">FinWor</span>
   <span class="lvl">Level <span id="lnum">1</span></span>
 </header>
@@ -2281,7 +2281,7 @@ function bestPath(word,drawnPath){
 // ══════════════════════════════════════
 // Монеты
 // ══════════════════════════════════════
-function addCoins(n,x,y){coins+=n;document.getElementById('cval').textContent=coins;save();updateBtns();if(x!==undefined)floatCoin(`+${n}🪙`,x,y);}
+function addCoins(n,x,y){coins+=n;document.getElementById('cval').textContent=coins;save();updateBtns();if(x!==undefined)floatCoin(`+${n}🪙`,x,y);sndCoin();}
 function spend(n){if(coins<n)return false;coins-=n;document.getElementById('cval').textContent=coins;save();updateBtns();return true;}
 function floatCoin(txt,x,y){const d=document.createElement('div');d.className='cf';d.textContent=txt;d.style.left=(x-20)+'px';d.style.top=(y-10)+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),1150);}
 function updateBtns(){[['t-hi',50],['t-fw',120],['t-sk',250]].forEach(([id,c])=>{document.getElementById(id).disabled=coins<c;});}
@@ -2392,7 +2392,7 @@ function pointerMove(i){
   if(pos!==-1){if(pos<sel.length-1){sel=sel.slice(0,pos+1);refreshCells();drawLines();document.getElementById('wdisplay').textContent=cw();}return;}
   if(adj4(sel[sel.length-1],i)){sel.push(i);sndTick();refreshCells();drawLines();document.getElementById('wdisplay').textContent=cw();}
 }
-function pointerUp(){dragging=false;submit();}
+function pointerUp(){dragging=false;resetSlide();submit();}
 function clearSel(){sel=[];refreshCells();drawLines();document.getElementById('wdisplay').textContent='';}
 
 // ══════════════════════════════════════
@@ -2502,83 +2502,155 @@ function nextLevel(){
 // ── Звук ────────────────────────────────
 let audioCtx=null;
 let soundOn=localStorage.getItem('fw_snd')!=='0';
-let _reverb=null;
 
 function getACtx(){
   if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
   return audioCtx;
 }
 
-function getReverb(ctx){
-  if(_reverb)return _reverb;
-  try{
-    const cv=ctx.createConvolver();
-    const sr=ctx.sampleRate,len=sr*0.9;
-    const buf=ctx.createBuffer(2,len,sr);
-    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);}
-    cv.buffer=buf;_reverb=cv;return cv;
-  }catch(e){return null;}
-}
-
-function playNote(freq,dur,vol,type,detune,wet){
+// Базовый генератор мягкого звука с плавным огибанием
+function softTone(freq,dur,vol,type){
   if(!soundOn)return;
   try{
     const ctx=getACtx(),now=ctx.currentTime;
-    const o1=ctx.createOscillator(),o2=ctx.createOscillator();
-    const gDry=ctx.createGain(),gOut=ctx.createGain();
-    o1.type=o2.type=type||'sine';
-    o1.frequency.value=freq;
-    o2.frequency.value=freq*(1+(detune||4)/1000);
-    o1.connect(gDry);o2.connect(gDry);
-    gDry.gain.value=0.5;
-    gDry.connect(gOut);
-    if(wet){
-      const rv=getReverb(ctx);
-      if(rv){const gW=ctx.createGain();gW.gain.value=0.25;gDry.connect(rv);rv.connect(gW);gW.connect(gOut);}
-    }
-    gOut.connect(ctx.destination);
-    const atk=Math.min(0.012,dur*0.12);
-    gOut.gain.setValueAtTime(0,now);
-    gOut.gain.linearRampToValueAtTime(vol,now+atk);
-    gOut.gain.setValueAtTime(vol,now+dur*0.35);
-    gOut.gain.exponentialRampToValueAtTime(0.001,now+dur);
-    o1.start(now);o1.stop(now+dur+0.05);
-    o2.start(now);o2.stop(now+dur+0.05);
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    const lp=ctx.createBiquadFilter();
+    lp.type='lowpass';lp.frequency.value=2200;lp.Q.value=0.5;
+    osc.type=type||'sine';
+    osc.frequency.setValueAtTime(freq,now);
+    osc.connect(lp);lp.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0,now);
+    gain.gain.linearRampToValueAtTime(vol,now+0.008);
+    gain.gain.setValueAtTime(vol,now+dur*0.3);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+dur);
+    osc.start(now);osc.stop(now+dur+0.02);
   }catch(e){}
 }
 
-// Тик при каждой букве — лёгкий мягкий клик
-function sndTick(){playNote(660,0.07,0.11,'sine',5,false);}
+// Щелчок с pitchbend вниз — удар пальцем
+function softClick(freq,dur,vol){
+  if(!soundOn)return;
+  try{
+    const ctx=getACtx(),now=ctx.currentTime;
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    const lp=ctx.createBiquadFilter();
+    lp.type='lowpass';lp.frequency.value=1800;
+    osc.type='sine';
+    osc.frequency.setValueAtTime(freq,now);
+    osc.frequency.exponentialRampToValueAtTime(freq*0.55,now+dur);
+    osc.connect(lp);lp.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(vol,now);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+dur);
+    osc.start(now);osc.stop(now+dur+0.01);
+  }catch(e){}
+}
 
-// Правильное слово — тёплый восходящий аккорд
+// Нотная шкала для слайда по буквам (до-ре-ми-фа-соль-ля-си-до)
+const SLIDE_SCALE=[261,294,330,349,392,440,494,523,587,659,698,784];
+let _slideStep=0;
+function sndTick(){
+  // Нота растёт с каждой буквой
+  const freq=SLIDE_SCALE[Math.min(_slideStep,SLIDE_SCALE.length-1)];
+  _slideStep++;
+  softTone(freq,0.09,0.07,'sine');
+}
+function resetSlide(){_slideStep=0;}
+
+// Правильное слово — мягкий тёплый аккорд с небольшим эхом
 function sndCorrect(){
-  playNote(523,0.2,0.2,'sine',3,false);
-  setTimeout(()=>playNote(659,0.2,0.2,'sine',3,false),115);
-  setTimeout(()=>playNote(784,0.32,0.2,'sine',3,true),230);
+  softTone(392,0.18,0.13,'sine');
+  setTimeout(()=>softTone(523,0.18,0.12,'sine'),90);
+  setTimeout(()=>softTone(659,0.28,0.11,'sine'),180);
 }
 
-// Ошибка — мягкий низкий удар, без резкости
+// Ошибка — мягкий глухой удар, без резкости
 function sndWrong(){
-  playNote(110,0.2,0.18,'sine',2,false);
-  playNote(85,0.16,0.1,'triangle',0,false);
+  softClick(120,0.18,0.12);
+  setTimeout(()=>softClick(90,0.14,0.07),60);
 }
 
-// Победа — фанфара с реверб на финальных нотах
+// Монеты — лёгкое звонкое динь
+function sndCoin(){
+  softTone(1047,0.12,0.08,'sine');
+  setTimeout(()=>softTone(1319,0.1,0.06,'sine'),70);
+}
+
+// Смена темы — плавный вжух вверх/вниз
+function sndTheme(toLight){
+  if(!soundOn)return;
+  try{
+    const ctx=getACtx(),now=ctx.currentTime;
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    const lp=ctx.createBiquadFilter();
+    lp.type='lowpass';lp.frequency.value=2000;
+    osc.type='sine';
+    if(toLight){
+      osc.frequency.setValueAtTime(220,now);
+      osc.frequency.linearRampToValueAtTime(660,now+0.2);
+    }else{
+      osc.frequency.setValueAtTime(660,now);
+      osc.frequency.linearRampToValueAtTime(220,now+0.2);
+    }
+    osc.connect(lp);lp.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.08,now);
+    gain.gain.linearRampToValueAtTime(0.0001,now+0.22);
+    osc.start(now);osc.stop(now+0.25);
+  }catch(e){}
+}
+
+// Вкл звука — мягкое появление
+function sndSoundOn(){
+  softTone(523,0.15,0.09,'sine');
+  setTimeout(()=>softTone(659,0.15,0.08,'sine'),100);
+}
+
+// Выкл звука — последний тихий щелчок перед тишиной
+function sndSoundOff(){
+  softClick(300,0.12,0.09);
+}
+
+// Кнопка меню "Играть" — бодрый лёгкий аккорд
+function sndBtnPlay(){
+  softTone(440,0.12,0.09,'sine');
+  setTimeout(()=>softTone(554,0.12,0.08,'sine'),80);
+}
+
+// Кнопка "Выбор уровня" — нейтральный мягкий тон
+function sndBtnLevels(){
+  softTone(370,0.13,0.08,'sine');
+}
+
+// Кнопка "Статистика" — чуть ниже
+function sndBtnStats(){
+  softTone(330,0.13,0.08,'sine');
+}
+
+// Кнопки назад/навигация — лёгкий клик
+function sndBtnBack(){
+  softClick(400,0.1,0.08);
+}
+
+// Победа — нежная переливающаяся фанфара
 function sndComplete(){
-  [523,659,784,1047].forEach((f,i)=>
-    setTimeout(()=>{
-      playNote(f,0.32,0.22,'sine',3,i>=2);
-      if(i===3)playNote(f*2,0.22,0.08,'sine',0,true);
-    },i*148)
-  );
+  const notes=[392,494,587,784,988];
+  notes.forEach((f,i)=>setTimeout(()=>{
+    softTone(f,0.35,0.13,'sine');
+    if(i===notes.length-1){
+      setTimeout(()=>softTone(f,0.5,0.08,'sine'),180);
+    }
+  },i*130));
 }
 
 function toggleSound(){
   soundOn=!soundOn;
   localStorage.setItem('fw_snd',soundOn?'1':'0');
   updateSndBtn();
-  if(soundOn){sndCorrect();}
-  else{if(navigator.vibrate)navigator.vibrate([30,15,30]);}
+  if(soundOn){sndSoundOn();}
+  else{sndSoundOff();if(navigator.vibrate)navigator.vibrate([20]);}
 }
 function updateSndBtn(){
   const b=document.getElementById('snd-btn');
@@ -2598,6 +2670,7 @@ function toggleTheme(){
   isLight=!isLight;
   localStorage.setItem('fw_theme',isLight?'light':'dark');
   applyTheme();
+  sndTheme(isLight);
   if(navigator.vibrate)navigator.vibrate([15]);
 }
 
