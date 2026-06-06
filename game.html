@@ -451,41 +451,6 @@ header {
 #spl.fading{animation:splFade .4s ease both;}
 @keyframes splFade{to{opacity:0;transform:scale(.95)}}
 
-/* ── Экран приветствия (TEMP) ── */
-#swelcome{padding:0;}
-#welcome-center{
-  min-height:100vh;min-height:100dvh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:0;padding:40px 20px;
-}
-#wlc-logo{animation:splIn .7s cubic-bezier(.34,1.56,.64,1) both;}
-#wlc-title{
-  font-size:2.4rem;font-weight:700;letter-spacing:-1px;color:#c0c0c0;
-  margin-top:10px;margin-bottom:32px;
-  animation:splTxt .5s .3s ease both;
-}
-#wlc-phase-wrap{
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  margin-bottom:52px;
-  animation:splTxt .5s .45s ease both;
-}
-#wlc-phase-lbl{font-size:.68rem;color:#505050;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;}
-#wlc-phase{font-size:1.1rem;font-weight:600;color:#c0c0c0;}
-#wlc-btn{
-  width:100%;max-width:280px;padding:17px 20px;
-  border-radius:50px;border:none;
-  background:#c0c0c0;color:#1c1c1e;
-  font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;
-  letter-spacing:.3px;
-  animation:splTxt .5s .6s ease both;
-  transition:transform .12s,opacity .12s;
-}
-#wlc-btn:active{transform:scale(.95);opacity:.8;}
-body.light #wlc-title,body.light #wlc-phase{color:#1c1c1e!important;}
-body.light #wlc-btn{background:#1c1c1e!important;color:#c8c8c8!important;}
-body.light #wlc-phase-lbl{color:#707070!important;}
-body.light #swelcome .m-logo path{stroke:#1c1c1e!important;}
-
 /* Главное меню */
 #smenu{padding:0;}
 #menu-center{
@@ -779,32 +744,6 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
   </div>
   <div id="spl-name">FinWor</div>
 </div>
-
-<!-- ══ ЭКРАН ПРИВЕТСТВИЯ (TEMP — удалить этот блок если не понравится) ══ -->
-<div id="swelcome" class="sovr hid">
-  <div id="welcome-center">
-    <div id="wlc-logo">
-      <svg viewBox="0 0 200 200" width="110" height="110" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 22,22 L 178,22 L 178,100 A 78,78 0 0 1 22,100 Z"
-              fill="none" stroke="#c0c0c0" stroke-width="17"
-              stroke-linejoin="round" stroke-linecap="round"/>
-        <text x="100" y="82" text-anchor="middle" fill="#c0c0c0"
-              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
-              font-size="30" font-weight="600">fin</text>
-        <text x="100" y="118" text-anchor="middle" fill="#c0c0c0"
-              font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif"
-              font-size="30" font-weight="600">wor</text>
-      </svg>
-    </div>
-    <div id="wlc-title">FinWor</div>
-    <div id="wlc-phase-wrap">
-      <div id="wlc-phase-lbl">твоя стадия</div>
-      <div id="wlc-phase">🌱 Зерно</div>
-    </div>
-    <button id="wlc-btn" onclick="onWelcomeStart()">Начать игру</button>
-  </div>
-</div>
-<!-- ══ КОНЕЦ ЭКРАНА ПРИВЕТСТВИЯ ══════════════════════════════ -->
 
 <!-- ══ ГЛАВНОЕ МЕНЮ ══════════════════════════════════════════ -->
 <div id="smenu" class="sovr hid" style="position:relative;">
@@ -2796,7 +2735,7 @@ function checkTut(){
 
 // ── Экраны ──────────────────────────────
 function showScr(id){
-  ['spl','swelcome','smenu','slvl','sstats'].forEach(s=>{
+  ['spl','smenu','slvl','sstats'].forEach(s=>{
     const el=document.getElementById(s);
     if(el)el.classList.toggle('hid',s!==id);
   });
@@ -2885,26 +2824,16 @@ function sndSplash(){
   }catch(e){}
 }
 
-function getPlayerPhase(){
-  const p=PHASES.find(ph=>maxLvl>=ph.from&&maxLvl<ph.to);
-  return p?p.name:PHASES[PHASES.length-1].name;
-}
-
-function showWelcome(){
-  document.getElementById('wlc-phase').textContent=getPlayerPhase();
-  showScr('swelcome');
-}
-
-function onWelcomeStart(){
-  sndSplash();        // звук интро — после касания, сработает!
-  const sw=document.getElementById('swelcome');
-  sw.style.transition='opacity .35s ease';
-  sw.style.opacity='0';
-  setTimeout(()=>checkTut(),370);
-}
 
 function initSplash(){
-  showWelcome();
+  showScr('spl');
+  setTimeout(()=>sndSplash(),80);
+  setTimeout(()=>{
+    const spl=document.getElementById('spl');
+    spl.style.transition='opacity .35s ease';
+    spl.style.opacity='0';
+    setTimeout(()=>checkTut(),370);
+  },2000);
 }
 
 applyTheme();
