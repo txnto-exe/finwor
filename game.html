@@ -358,7 +358,8 @@ header {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
 }
 #coins-row { display: flex; align-items: center; gap: 5px; font-size: .85rem; font-weight: 600; color: #c0c0c0; }
-#arch-wrap { display: flex; align-items: center; gap: 6px; }
+#arch-wrap { display: flex; align-items: center; gap: 6px; opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+#arch-wrap.visible { opacity: 1; pointer-events: auto; }
 #arch-ico   { font-size: .85rem; line-height: 1; }
 #arch-track { width: 72px; height: 6px; background: #2c2c2e; border-radius: 6px; overflow: hidden; }
 #arch-fill  { height: 100%; background: linear-gradient(90deg,#a07830,#d4a843); border-radius: 6px; transition: width .3s; width: 0%; }
@@ -2301,7 +2302,10 @@ function archiveWord(word){
       const ms=document.getElementById('ms');
       ms.querySelector('b').textContent='📦 Архивное слово!';
       ms.querySelector('small').textContent='Собери 20 таких и получишь 30 монет 🎁';
-      ms.classList.add('on');setTimeout(()=>ms.classList.remove('on'),3000);
+      ms.classList.add('on');
+      setTimeout(()=>ms.classList.remove('on'),3000);
+      // Показываем архив с плавным появлением
+      document.getElementById('arch-wrap').classList.add('visible');
     },600);
   }
   if(arch>=20){
@@ -2316,7 +2320,11 @@ function archiveWord(word){
   setWord(word+' → архив');
   setTimeout(()=>setWord(''),1400);
 }
-function refreshArch(){document.getElementById('arch-fill').style.width=(arch/20*100)+'%';document.getElementById('arch-lbl').textContent=`${arch} / 20`;}
+function refreshArch(){
+  document.getElementById('arch-fill').style.width=(arch/20*100)+'%';
+  document.getElementById('arch-lbl').textContent=`${arch} / 20`;
+  if(localStorage.getItem('fw_arch_intro'))document.getElementById('arch-wrap').classList.add('visible');
+}
 
 // ══════════════════════════════════════
 // Загрузка уровня
