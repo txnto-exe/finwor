@@ -358,10 +358,11 @@ header {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
 }
 #coins-row { display: flex; align-items: center; gap: 5px; font-size: .85rem; font-weight: 600; color: #c0c0c0; }
-#arch-wrap { display: flex; align-items: center; gap: 7px; }
-#arch-track { width: 68px; height: 2px; background: #2c2c2e; border-radius: 2px; overflow: hidden; }
-#arch-fill  { height: 100%; background: #808080; border-radius: 2px; transition: width .3s; width: 0%; }
-#arch-lbl   { font-size: .68rem; color: #505050; font-weight: 500; }
+#arch-wrap { display: flex; align-items: center; gap: 6px; }
+#arch-ico   { font-size: .85rem; line-height: 1; }
+#arch-track { width: 72px; height: 6px; background: #2c2c2e; border-radius: 6px; overflow: hidden; }
+#arch-fill  { height: 100%; background: linear-gradient(90deg,#a07830,#d4a843); border-radius: 6px; transition: width .3s; width: 0%; }
+#arch-lbl   { font-size: .68rem; color: #707050; font-weight: 600; }
 #dots { display: flex; gap: 6px; margin-bottom: 18px; }
 .dot  { width: 6px; height: 6px; border-radius: 50%; background: #2c2c2e; transition: background .3s; }
 .dot.on { background: #c0c0c0; }
@@ -762,10 +763,10 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
       </svg>
     </div>
     <div class="m-title">FinWor</div>
-    <div class="m-sub">словесная головоломка</div>
+    <div class="m-sub">🧩 словесная головоломка</div>
     <div class="m-coins">🪙 <span id="m-cval">0</span></div>
-    <button class="mbtn mbtn-p" onclick="doPlay()">Играть</button>
-    <button class="mbtn mbtn-s" onclick="doLevels()">Выбор уровня</button>
+    <button class="mbtn mbtn-p" onclick="doPlay()">🎮 Играть</button>
+    <button class="mbtn mbtn-s" onclick="doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn-icon" onclick="doStats()">📊 Статистика</button>
   </div>
 </div>
@@ -841,7 +842,7 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 <!-- ══ ТУТОРИАЛ ═══════════════════════════════════════════════ -->
 <div id="stut">
   <div class="tut-box">
-    <div class="tut-title">Как играть</div>
+    <div class="tut-title">🧩 Как играть</div>
     <div class="tut-anim">
       <div class="tut-cell th">С</div>
       <div class="tut-cell th">Л</div>
@@ -857,7 +858,7 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
       </div>
       <div class="tut-tip">
         <span class="tut-ti">✓</span>
-        <span>Найди все слова уровня — и переходи к следующему</span>
+        <span>Найди все слова уровня — и переходи к следующему 🏆</span>
       </div>
       <div class="tut-tip">
         <span class="tut-ti">🪙</span>
@@ -865,7 +866,7 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
       </div>
     </div>
     <div class="tut-bar"><div class="tut-bar-fill" id="tut-fill"></div></div>
-    <button class="tut-btn" onclick="endTut()">Начать играть</button>
+    <button class="tut-btn" onclick="endTut()">🎮 Начать играть</button>
   </div>
 </div>
 
@@ -884,6 +885,7 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 <div id="stats">
   <div id="coins-row">🪙 <span id="cval">0</span></div>
   <div id="arch-wrap">
+    <span id="arch-ico">📦</span>
     <div id="arch-track"><div id="arch-fill"></div></div>
     <span id="arch-lbl">0 / 20</span>
   </div>
@@ -2293,6 +2295,15 @@ function archiveWord(word){
   addCoins(3,ar.left+ar.width/2,ar.top);
   archSet.add(word);
   refreshArch();
+  if(!localStorage.getItem('fw_arch_intro')){
+    localStorage.setItem('fw_arch_intro','1');
+    setTimeout(()=>{
+      const ms=document.getElementById('ms');
+      ms.querySelector('b').textContent='📦 Архивное слово!';
+      ms.querySelector('small').textContent='Собери 20 таких и получишь 30 монет 🎁';
+      ms.classList.add('on');setTimeout(()=>ms.classList.remove('on'),3000);
+    },600);
+  }
   if(arch>=20){
     arch=0;
     setTimeout(()=>{
@@ -2474,6 +2485,8 @@ function complete(){
   clearProgress();
   if(lvl+1>maxLvl)maxLvl=lvl+1;
   save();sndComplete();setTimeout(()=>launchConfetti(),300);
+  const gc=document.getElementById('cval').getBoundingClientRect();
+  addCoins(5,gc.left+gc.width/2,gc.top);
   document.getElementById('onum').textContent=lvl+1;
   document.getElementById('owords').textContent=found.join(' · ');
   document.getElementById('overlay').classList.add('on');
