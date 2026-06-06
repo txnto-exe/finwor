@@ -2634,15 +2634,12 @@ function sndBtnBack(){
   softClick(400,0.1,0.08);
 }
 
-// Победа — нежная переливающаяся фанфара
+// Победа — короткий чистый аккорд, быстро и приятно
 function sndComplete(){
-  const notes=[392,494,587,784,988];
-  notes.forEach((f,i)=>setTimeout(()=>{
-    softTone(f,0.35,0.13,'sine');
-    if(i===notes.length-1){
-      setTimeout(()=>softTone(f,0.5,0.08,'sine'),180);
-    }
-  },i*130));
+  softTone(523,0.2,0.13,'sine');
+  setTimeout(()=>softTone(659,0.2,0.12,'sine'),80);
+  setTimeout(()=>softTone(784,0.28,0.14,'sine'),160);
+  setTimeout(()=>{softTone(1047,0.35,0.1,'sine');softTone(784,0.35,0.07,'sine');},280);
 }
 
 function toggleSound(){
@@ -2801,8 +2798,28 @@ function buildLGrid(){
   });
 }
 
+function sndSplash(){
+  // Мягкое появление — два тона нарастают вместе с логотипом
+  if(!soundOn)return;
+  try{
+    const ctx=getACtx(),now=ctx.currentTime;
+    [[220,0],[330,0.08],[440,0.18]].forEach(([f,delay])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1600;
+      o.type='sine';o.frequency.value=f;
+      o.connect(lp);lp.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(0,now+delay);
+      g.gain.linearRampToValueAtTime(0.06,now+delay+0.15);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+delay+0.9);
+      o.start(now+delay);o.stop(now+delay+1);
+    });
+  }catch(e){}
+}
+
 function initSplash(){
   showScr('spl');
+  // Звук через 80мс — чуть после появления логотипа
+  setTimeout(()=>sndSplash(),80);
   setTimeout(()=>{
     const spl=document.getElementById('spl');
     spl.style.transition='opacity .35s ease';
