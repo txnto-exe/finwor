@@ -723,6 +723,21 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 .stats-divider{
   width:100%;height:1px;background:#272729;
 }
+/* ── БОНУСНЫЙ УРОВЕНЬ ──────────────────────────────────── */
+#bonus-intro,#bonus-end{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:400;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px;text-align:center;}
+#bonus-intro.on,#bonus-end.on{display:flex;}
+.bns-title{font-size:2.4rem;font-weight:800;color:#f6b93b;letter-spacing:-1px;line-height:1.1;}
+.bns-sub{font-size:.95rem;color:#aaa;max-width:270px;line-height:1.7;}
+.bns-btn{background:#f6b93b;color:#1c1c1e;border:none;border-radius:14px;padding:15px 44px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:4px;}
+#bonus-timer-wrap{display:none;position:absolute;top:0;left:0;right:0;z-index:300;pointer-events:none;}
+#bonus-bar{height:5px;background:#222;}
+#bonus-fill{height:100%;background:#f6b93b;width:100%;transition:width 1s linear;}
+#bonus-secs{position:absolute;top:8px;right:12px;font-size:.7rem;font-weight:700;color:#f6b93b;}
+#bonus-found-lbl{font-size:1rem;color:#aaa;}
+#bonus-coins-lbl{font-size:2rem;font-weight:700;color:#f6b93b;}
+body.light #bonus-intro,body.light #bonus-end{background:rgba(200,200,200,.95);}
+body.light .bns-sub{color:#555;}
+body.light .bns-btn{color:#fff;background:#c8a028;}
 </style>
 </head>
 <body>
@@ -914,6 +929,25 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
   <div class="ot">Отлично</div>
   <div class="ow" id="owords"></div>
   <button class="bnext" onclick="nextLevel()">Следующий</button>
+</div>
+<!-- ══ БОНУСНЫЙ УРОВЕНЬ ══════════════════════════════════ -->
+<!-- Вступление -->
+<div id="bonus-intro">
+  <div class="bns-title">🎁 Бонусный уровень!</div>
+  <div class="bns-sub">У тебя <b>60 секунд</b>.<br>Находи любые слова из словаря — каждое <b>+5 🪙</b>.<br>Чем больше найдёшь, тем лучше!</div>
+  <button class="bns-btn" onclick="startBonus()">Поехали!</button>
+</div>
+<!-- Таймер (над сеткой) -->
+<div id="bonus-timer-wrap">
+  <div id="bonus-bar"><div id="bonus-fill"></div></div>
+  <div id="bonus-secs">60</div>
+</div>
+<!-- Итоги -->
+<div id="bonus-end">
+  <div class="bns-title">⏰ Время!</div>
+  <div id="bonus-found-lbl"></div>
+  <div id="bonus-coins-lbl"></div>
+  <button class="bns-btn" onclick="exitBonus()">В меню</button>
 </div>
 </div><!-- /game-wrap -->
 
@@ -2345,7 +2379,71 @@ let maxLvl = si('fw_ml',lvl); // дальший разблокированный
 let archSet=new Set();
 
 let sel=[],used=new Set(),found=[],dragging=false,lastCell=-1,checking=false;
-const CL=()=>LEVELS[lvl];
+// ══════════════════════════════════════
+// БОНУСНЫЕ УРОВНИ
+// ══════════════════════════════════════
+const BONUS_LEVELS = [
+  // ── Фаза 0: Зерно (5×5 = 25 кл., слова 3–5 букв) ──
+  { phase:0, rows:5, cols:5, words:[],
+    grid:["Р","О","Г","А","Т","У","С","К","О","Р","Б","Е","Л","К","А","О","С","А","Р","Е","Б","А","Н","К","А"] },
+  // РОГ[0-2], БЕЛКА[10-14], ОСА[15-17], БАНКА[20-24], КОРА[7,8,9,14]
+  { phase:0, rows:5, cols:5, words:[],
+    grid:["С","О","Л","Н","Ь","Т","Р","А","В","А","О","Г","О","Н","Ь","В","О","Л","К","А","К","О","С","Т","Ь"] },
+  // ТРАВА[5-9], ОГОНЬ[10-14], ВОЛКА[15-19], КОСТЬ[20-24]
+  { phase:0, rows:5, cols:5, words:[],
+    grid:["Л","У","Г","О","В","О","С","Е","Н","Ь","К","А","Р","Т","А","Б","Е","Р","Е","Г","Д","О","М","К","И"] },
+  // ЛУГ[0-2], ОСЕНЬ[5-9], КАРТА[10-14], БЕРЕГ[15-19], ДОМ[20-22]
+  { phase:0, rows:5, cols:5, words:[],
+    grid:["Ч","А","Й","К","А","У","Т","Р","О","Б","Е","З","А","С","А","Д","О","М","Ы","К","С","Н","Е","Г","А"] },
+  // ЧАЙКА[0-4], УТРО[5-8], ОСА[10,?], СНЕГ[20-23], ДОМ[15-17]
+  { phase:0, rows:5, cols:5, words:[],
+    grid:["В","О","Р","О","Н","А","К","У","Л","А","С","Т","А","Р","К","О","С","А","Д","К","К","О","Т","И","К"] },
+  // ВОРОН[0-4], СТАРТ?, ОСА[15-17], КОТИК[20-24]
+
+  // ── Фаза 1: Росток (6×5 = 30 кл., слова 5–6 букв) ──
+  { phase:1, rows:6, cols:5, words:[],
+    grid:["К","А","Р","Т","А","О","Б","Л","А","К","С","К","А","Л","А","Т","О","Г","О","Р","А","Д","Р","О","В","В","Е","С","Н","А"] },
+  // КАРТА[0-4], СКАЛА[10-14], ВЕСНА[25-29]
+  { phase:1, rows:6, cols:5, words:[],
+    grid:["С","Е","Р","Д","Е","К","Р","Ы","Ш","А","Л","У","Г","О","В","О","С","Е","Н","Ь","К","О","Н","Е","Ц","Т","Р","А","В","А"] },
+  // КРЫША[5-9], ЛУГ[10-12], ОСЕНЬ[15-19], КОНЕЦ[20-24], ТРАВА[25-29]
+  { phase:1, rows:6, cols:5, words:[],
+    grid:["З","А","К","О","Н","О","Б","Р","А","З","С","Е","М","Ь","Я","Д","Р","У","Г","А","К","Н","И","Г","А","М","О","Р","Я","К"] },
+  // ЗАКОН[0-4], ОБРАЗ[5-9], СЕМЬЯ[10-14], ДРУГА[15-19], КНИГА[20-24], МОРЯК[25-29]
+  { phase:1, rows:6, cols:5, words:[],
+    grid:["В","О","Д","А","С","Т","А","Н","Е","Ц","О","Г","О","Н","Ь","С","О","Н","Е","Т","Г","О","Р","О","Д","П","Е","С","Н","Я"] },
+  // ВОДА[0-3], ТАНЕЦ[5-9], ОГОНЬ[10-14], СОНЕТ[15-19], ГОРОД[20-24], ПЕСНЯ[25-29]
+  { phase:1, rows:6, cols:5, words:[],
+    grid:["Б","Е","Р","Е","Г","О","К","Е","А","Н","С","Т","Р","А","Х","Р","Е","К","А","Я","С","В","Е","Т","А","Р","О","Б","О","Т"] },
+  // БЕРЕГ[0-4], ОКЕАН[5-9], СТРАХ[10-14], РЕКАЯ?, СВЕТ[20-23], РОБОТ[25-29]
+
+  // ── Фаза 2: Дерево (6×6 = 36 кл., слова 7–8 букв) ──
+  { phase:2, rows:6, cols:6, words:[],
+    grid:["К","Р","А","С","О","Т","А","Б","Р","И","К","А","Г","О","Р","О","Д","А","З","А","К","А","Т","Ы","С","В","О","Б","О","Д","М","О","Р","О","З","Ы"] },
+  // ГОРОДА[12-17], ЗАКАТЫ[18-23], СВОБОД[24-29], МОРОЗЫ[30-35]
+  { phase:2, rows:6, cols:6, words:[],
+    grid:["С","Т","О","Л","И","Ц","А","К","А","Р","Т","А","Б","Е","С","Е","Д","А","К","Р","А","С","К","А","М","О","Л","О","К","О","Р","А","К","Е","Т","А"] },
+  // СТОЛИЦ[0-5], КАРТА[6,7?]... БЕСЕДА[12-17], КРАСКА[18-23], МОЛОКО[24-29], РАКЕТА[30-35]
+  { phase:2, rows:6, cols:6, words:[],
+    grid:["Ж","У","Р","А","В","Л","Ь","О","К","Т","Я","Б","Р","У","Б","А","Ш","К","А","К","В","А","Р","Е","Л","Ь","П","О","С","Ы","Л","К","А","Б","О","Ц"] },
+  // ЖУРАВЛЬ[0-6], ОКТЯБР[?], РУБАШКА[12-18?], АКВАРЕЛ[?], ПОСЫЛКА[26-32]
+  { phase:2, rows:6, cols:6, words:[],
+    grid:["К","Р","О","В","А","Т","Ь","А","Ш","К","А","Б","Е","С","Е","Д","К","А","М","О","Л","Ч","А","Н","И","Е","П","Е","Р","Ч","А","Т","К","А","Б","Ц"] },
+  // КРОВАТЬ[0-6], БЕСЕДКА[12-18?], МОЛЧАНИЕ[?], ПЕРЧАТКА[26-33?]
+  { phase:2, rows:6, cols:6, words:[],
+    grid:["О","К","Т","Я","Б","Р","Ь","Ш","К","А","Т","У","Л","К","А","С","Е","М","А","Ф","О","Р","К","А","Р","Т","И","Н","А","С","Т","О","Л","И","Ц","А"] },
+  // ОКТЯБРЬ[0-6], ШКАТУЛКА[7-14], СЕМАФОР[15-21], КАРТИНА[22-28], СТОЛИЦА[29-35]
+];
+
+// ── Состояние бонуса ──
+let bonusLevelData = null;
+let bonusMode = false;
+let bonusTmr = null;
+let bonusSecs = 60;
+let bonusFound = new Set();
+const bonusUsedIdx = {}; // phase → Set of used indices
+
+const CL = () => bonusLevelData || LEVELS[lvl];
 const R=i=>Math.floor(i/CL().cols), C=i=>i%CL().cols;
 const rev=s=>[...s].reverse().join('');
 
@@ -2537,10 +2635,80 @@ function clearSel(){sel=[];refreshCells();drawLines();document.getElementById('w
 // ══════════════════════════════════════
 // Проверка слова
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// БОНУС — функции
+// ══════════════════════════════════════
+function triggerBonus(){
+  document.getElementById('bonus-intro').classList.add('on');
+}
+function startBonus(){
+  document.getElementById('bonus-intro').classList.remove('on');
+  // Выбираем уровень по фазе
+  const ph = PHASES.findIndex(p=>lvl>=p.from&&lvl<p.to);
+  const phIdx = ph<0?0:ph;
+  const pool = BONUS_LEVELS.filter(b=>b.phase===phIdx);
+  if(!pool.length){ loadLevel(); return; }
+  if(!bonusUsedIdx[phIdx]) bonusUsedIdx[phIdx]=new Set();
+  const avail = pool.map((_,i)=>i).filter(i=>!bonusUsedIdx[phIdx].has(i));
+  const pick = avail.length ? avail[Math.floor(Math.random()*avail.length)] : Math.floor(Math.random()*pool.length);
+  if(avail.length) bonusUsedIdx[phIdx].add(pick);
+  bonusLevelData = pool[pick];
+  bonusMode = true;
+  bonusFound = new Set();
+  used = new Set(); sel = []; found = [];
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('dots').style.display = 'none';
+  loadLevel();
+  // Запускаем таймер
+  bonusSecs = 60;
+  const wrap = document.getElementById('bonus-timer-wrap');
+  wrap.style.display = 'block';
+  document.getElementById('bonus-fill').style.width = '100%';
+  document.getElementById('bonus-secs').textContent = '60';
+  bonusTmr = setInterval(()=>{
+    bonusSecs--;
+    document.getElementById('bonus-fill').style.width=(bonusSecs/60*100)+'%';
+    document.getElementById('bonus-secs').textContent = bonusSecs;
+    if(bonusSecs<=0) finishBonus();
+  },1000);
+}
+function finishBonus(){
+  clearInterval(bonusTmr); bonusTmr=null;
+  document.getElementById('bonus-timer-wrap').style.display='none';
+  const n = bonusFound.size, c = n*5;
+  addCoins(c);
+  document.getElementById('bonus-found-lbl').textContent = 'Найдено слов: '+n;
+  document.getElementById('bonus-coins-lbl').textContent = '+'+c+' 🪙';
+  document.getElementById('bonus-end').classList.add('on');
+}
+function exitBonus(){
+  document.getElementById('bonus-end').classList.remove('on');
+  bonusMode = false; bonusLevelData = null;
+  clearInterval(bonusTmr); bonusTmr=null;
+  document.getElementById('toolbar').style.display = '';
+  document.getElementById('dots').style.display = '';
+  doMenu();
+}
+
 function submit(){
   const w=cw();
   if(w.length===0){clearSel();return;}
-  if(w.length===1){wrongFx();clearSel();return;} // одна буква — тряска+вибрация
+  if(w.length===1){wrongFx();clearSel();return;}
+  // ── Бонусный режим ──────────────────────────────────
+  if(bonusMode){
+    if(w.length>=3 && VOCAB.has(w) && !bonusFound.has(w)){
+      bonusFound.add(w);
+      const gc=document.getElementById('cval').getBoundingClientRect();
+      addCoins(5,gc.left+gc.width/2,gc.top);
+      sndCorrect();
+      setWord('+5 🪙  '+w,'');
+      setTimeout(()=>setWord(''),1000);
+    } else if(bonusFound.has(w)){
+      setWord('Уже находил','warn');
+      setTimeout(()=>setWord(''),1200);
+    } else { wrongFx(); }
+    clearSel(); return;
+  }
   const lw=matchLevel(w);
   if(lw){
     const path=[...sel];
@@ -2621,6 +2789,7 @@ function tSkip(){if(!spend(250))return;if(navigator.vibrate)navigator.vibrate([2
 // Конец уровня
 // ══════════════════════════════════════
 function complete(){
+  if(bonusMode) return; // в бонусе complete не вызывается
   clearProgress();
   if(lvl+1>maxLvl)maxLvl=lvl+1;
   save();sndComplete();setTimeout(()=>launchConfetti(),300);
@@ -2631,8 +2800,16 @@ function complete(){
   document.getElementById('overlay').classList.add('on');
 }
 function nextLevel(){
+  const wasLvl = lvl;
   lvl=(lvl+1<LEVELS.length)?lvl+1:0;
-  save();loadLevel();
+  save();
+  document.getElementById('overlay').classList.remove('on');
+  // Каждые 10 пройденных уровней → бонус
+  if((wasLvl+1)%10===0){
+    triggerBonus();
+  } else {
+    loadLevel();
+  }
 }
 
 // ══════════════════════════════════════
