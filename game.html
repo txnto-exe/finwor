@@ -960,35 +960,6 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   <div class="ow" id="owords"></div>
   <button class="bnext" onclick="nextLevel()">Следующий</button>
 </div>
-<!-- ══ АДМИН-ПАНЕЛЬ ═══════════════════════════════════════ -->
-<div id="admin-panel">
-  <button class="adm-close" onclick="document.getElementById('admin-panel').classList.remove('on')">✕</button>
-  <div class="adm-title">🛠 Режим разработчика <span class="adm-badge">ADMIN</span></div>
-
-  <div class="adm-row">
-    <button class="adm-btn" onclick="admCoins()" id="adm-inf-btn">💰 ∞ Монеты</button>
-    <button class="adm-btn" onclick="admUnlock()">🔓 Все уровни</button>
-    <button class="adm-btn" onclick="admBonus()">🎁 Бонус-уровень</button>
-    <button class="adm-btn" onclick="admComplete()">⚡ Пройти уровень</button>
-  </div>
-
-  <div class="adm-row">
-    <span style="color:#888;font-size:.7rem;align-self:center">Перейти к уровню:</span>
-    <div class="adm-inp-row">
-      <input class="adm-inp" id="adm-lvl-inp" type="number" min="1" max="110" value="1" placeholder="№">
-      <button class="adm-btn" onclick="admGoto()">→ Перейти</button>
-    </div>
-  </div>
-
-  <div class="adm-row">
-    <button class="adm-btn" onclick="admMenu()">🏠 Меню</button>
-    <button class="adm-btn" onclick="admStats()">📊 Стата</button>
-    <button class="adm-btn" onclick="admReload()">🔄 Перезагрузить</button>
-    <button class="adm-btn" style="border-color:#e74c3c;color:#e74c3c" onclick="admReset()">🗑 Сбросить всё</button>
-  </div>
-
-  <div id="adm-info" style="font-size:.65rem;color:#888;margin-top:4px;"></div>
-</div>
 <!-- ══ БОНУСНЫЙ УРОВЕНЬ ══════════════════════════════════ -->
 <!-- Вступление -->
 <div id="bonus-intro">
@@ -3346,5 +3317,34 @@ function admReset(){
   location.reload();
 }
 </script>
+<!-- ══ АДМИН-ПАНЕЛЬ (вне game-wrap, всегда поверх всего) ═══ -->
+<div id="admin-panel">
+  <button class="adm-close" onclick="document.getElementById('admin-panel').classList.remove('on')">✕</button>
+  <div class="adm-title">🛠 Режим разработчика <span class="adm-badge">ADMIN</span></div>
+
+  <div class="adm-row">
+    <button class="adm-btn" onclick="admCoins()" id="adm-inf-btn">💰 ∞ Монеты</button>
+    <button class="adm-btn" onclick="admUnlock()">🔓 Все уровни</button>
+    <button class="adm-btn" onclick="admBonus()">🎁 Бонус-уровень</button>
+    <button class="adm-btn" onclick="admComplete()">⚡ Пройти уровень</button>
+  </div>
+
+  <div class="adm-row">
+    <span style="color:#888;font-size:.7rem;align-self:center">Перейти к уровню:</span>
+    <div class="adm-inp-row">
+      <input class="adm-inp" id="adm-lvl-inp" type="number" min="1" max="110" value="1" placeholder="№">
+      <button class="adm-btn" onclick="admGoto()">→ Перейти</button>
+    </div>
+  </div>
+
+  <div class="adm-row">
+    <button class="adm-btn" onclick="admMenu()">🏠 Меню</button>
+    <button class="adm-btn" onclick="admStats()">📊 Стата</button>
+    <button class="adm-btn" onclick="admReload()">🔄 Перезагрузить</button>
+    <button class="adm-btn" style="border-color:#e74c3c;color:#e74c3c" onclick="admReset()">🗑 Сбросить всё</button>
+  </div>
+
+  <div id="adm-info" style="font-size:.65rem;color:#888;margin-top:4px;"></div>
+</div>
 </body>
 </html>
