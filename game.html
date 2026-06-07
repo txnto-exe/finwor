@@ -763,6 +763,20 @@ body.light .bns-btn{color:#fff;background:#c8a028;}
 body.light #admin-panel{background:#e8e8e8;border-color:#c8a028;}
 body.light .adm-btn{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
+#theme-overlay{position:fixed;inset:0;z-index:489;display:none;}
+#theme-overlay.on{display:block;}
+#theme-panel{position:fixed;bottom:-110px;left:0;right:0;z-index:490;
+  background:#272729;border-radius:20px 20px 0 0;
+  padding:14px 20px 28px;transition:bottom .3s cubic-bezier(.4,0,.2,1);}
+#theme-panel.open{bottom:0;}
+#theme-panel-title{text-align:center;font-size:.68rem;color:#606060;
+  letter-spacing:.9px;text-transform:uppercase;margin-bottom:13px;}
+#theme-panel-row{display:flex;justify-content:center;gap:13px;align-items:center;}
+.th-dot{width:46px;height:46px;border-radius:50%;cursor:pointer;
+  border:2.5px solid transparent;transition:border-color .15s,transform .12s;
+  box-sizing:border-box;flex-shrink:0;}
+.th-dot.cur{border-color:#fff;transform:scale(1.18);}
+.th-dot:active{transform:scale(.88);}
 </style>
 </head>
 <body>
@@ -787,7 +801,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 
 <!-- ══ ГЛАВНОЕ МЕНЮ ══════════════════════════════════════════ -->
 <div id="smenu" class="sovr hid" style="position:relative;">
-  <button id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <button id="theme-btn" onclick="openThemePicker()">🌙</button>
   <button id="snd-btn" onclick="toggleSound()">🎵</button>
   <div id="menu-center">
     <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
@@ -3023,18 +3037,83 @@ function updateSndBtn(){
 }
 
 // ── Тема ────────────────────────────────
-let isLight=localStorage.getItem('fw_theme')==='light';
-function applyTheme(){
-  document.body.classList.toggle('light',isLight);
-  const b=document.getElementById('theme-btn');
-  if(b)b.textContent=isLight?'☀️':'🌙';
+const THEMES=[
+  {id:'dark',   bg:'#1c1c1e',cell:'#272729',sel:'#c0c0c0',stx:'#1c1c1e',used:'#141416',txt:'#c0c0c0'},
+  {id:'light',  bg:'#c8c8c8',cell:'#b4b4b4',sel:'#1c1c1e',stx:'#c8c8c8',used:'#9a9a9a',txt:'#1c1c1e'},
+  {id:'ocean',  bg:'#0d1b2a',cell:'#1a3045',sel:'#4a9eff',stx:'#fff',   used:'#0a1520',txt:'#c0d8f0'},
+  {id:'forest', bg:'#0a1a0a',cell:'#1a3018',sel:'#50d060',stx:'#0a1a0a',used:'#081208',txt:'#a0d0a0'},
+  {id:'violet', bg:'#150d28',cell:'#251848',sel:'#9060f0',stx:'#fff',   used:'#0d0818',txt:'#c0a0f0'},
+  {id:'crimson',bg:'#280808',cell:'#401010',sel:'#ff5050',stx:'#fff',   used:'#180404',txt:'#f0a0a0'},
+  {id:'gold',   bg:'#1a1508',cell:'#2a2010',sel:'#f6b93b',stx:'#1a1508',used:'#100e04',txt:'#e0c880'},
+];
+function themeCSS(t){
+  return[
+    `html{background:${t.bg}!important}`,
+    `body.th-${t.id}{background:${t.bg}!important;color:${t.txt}!important}`,
+    `body.th-${t.id} .cell{background:${t.cell}!important;color:${t.txt}!important}`,
+    `body.th-${t.id} .cell.sel{background:${t.sel}!important;color:${t.stx}!important}`,
+    `body.th-${t.id} .cell.used{background:${t.used}!important;color:${t.cell}!important}`,
+    `body.th-${t.id} #toolbar{background:linear-gradient(to top,${t.bg} 70%,transparent)!important}`,
+    `body.th-${t.id} #spl,body.th-${t.id} .sovr,body.th-${t.id} #overlay{background:${t.bg}!important}`,
+    `body.th-${t.id} .mbtn-p,body.th-${t.id} .bnext{background:${t.sel}!important;color:${t.stx}!important}`,
+    `body.th-${t.id} .mbtn-s,body.th-${t.id} .tbtn,body.th-${t.id} .lcard,body.th-${t.id} #ms,body.th-${t.id} .tut-box,body.th-${t.id} .stat-card,body.th-${t.id} .adm-btn{background:${t.cell}!important}`,
+    `body.th-${t.id} .lcard.cur,body.th-${t.id} .tut-cell.th{background:${t.sel}!important;color:${t.stx}!important}`,
+    `body.th-${t.id} .slvl-hdr,body.th-${t.id} #admin-panel,body.th-${t.id} #theme-panel,body.th-${t.id} #bonus-intro,body.th-${t.id} #bonus-end{background:${t.bg}!important}`,
+    `body.th-${t.id} .dot.on,body.th-${t.id} .sp-fill,body.th-${t.id} #arch-fill{background:${t.sel}!important}`,
+    `body.th-${t.id} #wdisplay,body.th-${t.id} .logo,body.th-${t.id} .slvl-ttl,body.th-${t.id} .stat-val,body.th-${t.id} #ms b,body.th-${t.id} .m-title,body.th-${t.id} .ot{color:${t.txt}!important}`,
+    `body.th-${t.id} .m-logo path,body.th-${t.id} .stats-logo path,body.th-${t.id} #spl-logo path{stroke:${t.txt}!important}`,
+    `body.th-${t.id} .m-logo text,body.th-${t.id} .stats-logo text,body.th-${t.id} #spl-logo text{fill:${t.txt}!important}`,
+    `body.th-${t.id} .tut-cell{background:${t.cell}!important;color:${t.txt}!important}`,
+    `body.th-${t.id} .tut-bar-fill,body.th-${t.id} .tut-btn{background:${t.sel}!important;color:${t.stx}!important}`,
+    `@keyframes hpulse{0%,100%{background:${t.cell};box-shadow:none;transform:scale(1)}50%{background:${t.sel};box-shadow:0 0 14px rgba(0,0,0,.5);transform:scale(1.13);color:${t.stx}}}`,
+  ].join('\n');
 }
-function toggleTheme(){
-  isLight=!isLight;
-  localStorage.setItem('fw_theme',isLight?'light':'dark');
+let curThemeId=localStorage.getItem('fw_theme_id')||'dark';
+let isLight=(curThemeId==='light');
+function applyTheme(){
+  const t=THEMES.find(x=>x.id===curThemeId)||THEMES[0];
+  THEMES.forEach(x=>document.body.classList.remove('th-'+x.id));
+  document.body.classList.remove('light');
+  let el=document.getElementById('th-ov');
+  if(!el){el=document.createElement('style');el.id='th-ov';document.head.appendChild(el);}
+  if(t.id==='dark'){el.textContent='';}
+  else if(t.id==='light'){document.body.classList.add('light');el.textContent='';}
+  else{document.body.classList.add('th-'+t.id);el.textContent=themeCSS(t);}
+  isLight=(t.id==='light');
+  const b=document.getElementById('theme-btn');
+  if(b)b.textContent=t.id==='light'?'☀️':t.id==='dark'?'🌙':'🎨';
+  document.querySelectorAll('.th-dot').forEach(d=>d.classList.toggle('cur',d.dataset.th===curThemeId));
+}
+function openThemePicker(){
+  sndTheme(false);
+  renderThemePicker();
+  document.getElementById('theme-panel').classList.add('open');
+  document.getElementById('theme-overlay').classList.add('on');
+}
+function closeThemePicker(){
+  document.getElementById('theme-panel').classList.remove('open');
+  document.getElementById('theme-overlay').classList.remove('on');
+}
+function selectTheme(id){
+  curThemeId=id;
+  localStorage.setItem('fw_theme_id',id);
+  localStorage.setItem('fw_theme',id==='light'?'light':'dark');
   applyTheme();
-  sndTheme(isLight);
-  if(navigator.vibrate)navigator.vibrate([15]);
+  closeThemePicker();
+  if(navigator.vibrate)navigator.vibrate([8]);
+}
+function renderThemePicker(){
+  const row=document.getElementById('theme-panel-row');
+  if(row.children.length)return;
+  THEMES.forEach(t=>{
+    const d=document.createElement('div');
+    d.className='th-dot'+(curThemeId===t.id?' cur':'');
+    d.dataset.th=t.id;
+    d.title=t.id;
+    d.style.background=`linear-gradient(135deg,${t.bg} 50%,${t.sel} 50%)`;
+    d.onclick=()=>selectTheme(t.id);
+    row.appendChild(d);
+  });
 }
 
 // ── Конфетти ────────────────────────────
@@ -3318,6 +3397,11 @@ function admReset(){
 }
 </script>
 <!-- ══ АДМИН-ПАНЕЛЬ (вне game-wrap, всегда поверх всего) ═══ -->
+<div id="theme-overlay" onclick="closeThemePicker()"></div>
+<div id="theme-panel">
+  <div id="theme-panel-title">Тема</div>
+  <div id="theme-panel-row"></div>
+</div>
 <div id="admin-panel">
   <button class="adm-close" onclick="document.getElementById('admin-panel').classList.remove('on')">✕</button>
   <div class="adm-title">🛠 Режим разработчика <span class="adm-badge">ADMIN</span></div>
