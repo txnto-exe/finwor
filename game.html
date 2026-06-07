@@ -790,8 +790,8 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   <button id="theme-btn" onclick="toggleTheme()">🌙</button>
   <button id="snd-btn" onclick="toggleSound()">🎵</button>
   <div id="menu-center">
-    <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;">
-      <svg viewBox="0 0 200 200" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+    <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
+      <svg viewBox="0 0 200 200" width="100" height="100" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;">
         <path d="M 22,22 L 178,22 L 178,100 A 78,78 0 0 1 22,100 Z"
               fill="none" stroke="#c0c0c0" stroke-width="17"
               stroke-linejoin="round" stroke-linecap="round"/>
@@ -3236,7 +3236,13 @@ let _adminTaps=0,_adminTimer=null,_admInfCoins=false;
 function adminTap(){
   _adminTaps++;
   clearTimeout(_adminTimer);
-  _adminTimer=setTimeout(()=>{_adminTaps=0;},800);
+  _adminTimer=setTimeout(()=>{_adminTaps=0;},2000);
+  // Визуальный отклик — лёгкая вспышка лого
+  const logo=document.querySelector('.m-logo svg');
+  if(logo){
+    logo.style.opacity='0.4';
+    setTimeout(()=>logo.style.opacity='',120);
+  }
   if(_adminTaps>=5){
     _adminTaps=0;
     const p=document.getElementById('admin-panel');
