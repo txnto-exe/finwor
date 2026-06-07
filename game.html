@@ -3009,11 +3009,11 @@ function sndComplete(){
 }
 
 function toggleSound(){
+  if(soundOn){sndSoundOff();if(navigator.vibrate)navigator.vibrate([20]);}
   soundOn=!soundOn;
   localStorage.setItem('fw_snd',soundOn?'1':'0');
   updateSndBtn();
   if(soundOn){sndSoundOn();}
-  else{sndSoundOff();if(navigator.vibrate)navigator.vibrate([20]);}
 }
 function updateSndBtn(){
   const b=document.getElementById('snd-btn');
