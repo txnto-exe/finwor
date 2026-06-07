@@ -742,6 +742,27 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 body.light #bonus-intro,body.light #bonus-end{background:rgba(200,200,200,.95);}
 body.light .bns-sub{color:#555;}
 body.light .bns-btn{color:#fff;background:#c8a028;}
+/* ── АДМИН-ПАНЕЛЬ ──────────────────────────────────────── */
+#admin-panel{display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:#1a1a1c;border-top:2px solid #f6b93b;padding:12px 14px 20px;
+  font-size:.8rem;color:#ddd;}
+#admin-panel.on{display:block;}
+.adm-title{font-size:.65rem;font-weight:700;color:#f6b93b;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.adm-badge{background:#f6b93b;color:#1a1a1c;font-size:.55rem;padding:1px 5px;border-radius:4px;}
+.adm-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
+.adm-btn{background:#2a2a2c;border:1px solid #444;color:#ddd;border-radius:8px;
+  padding:6px 10px;font-size:.72rem;cursor:pointer;white-space:nowrap;}
+.adm-btn:active{background:#3a3a3c;}
+.adm-btn.active{border-color:#f6b93b;color:#f6b93b;}
+.adm-inp-row{display:flex;gap:6px;align-items:center;}
+.adm-inp{background:#2a2a2c;border:1px solid #444;color:#ddd;border-radius:8px;
+  padding:5px 10px;font-size:.8rem;width:70px;text-align:center;}
+.adm-close{position:absolute;top:10px;right:12px;background:none;border:none;
+  color:#777;font-size:1.1rem;cursor:pointer;padding:2px 6px;}
+body.light #admin-panel{background:#e8e8e8;border-color:#c8a028;}
+body.light .adm-btn{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
+body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 </style>
 </head>
 <body>
@@ -769,7 +790,7 @@ body.light .bns-btn{color:#fff;background:#c8a028;}
   <button id="theme-btn" onclick="toggleTheme()">🌙</button>
   <button id="snd-btn" onclick="toggleSound()">🎵</button>
   <div id="menu-center">
-    <div class="m-logo">
+    <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;">
       <svg viewBox="0 0 200 200" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
         <path d="M 22,22 L 178,22 L 178,100 A 78,78 0 0 1 22,100 Z"
               fill="none" stroke="#c0c0c0" stroke-width="17"
@@ -938,6 +959,35 @@ body.light .bns-btn{color:#fff;background:#c8a028;}
   <div class="ot">Отлично</div>
   <div class="ow" id="owords"></div>
   <button class="bnext" onclick="nextLevel()">Следующий</button>
+</div>
+<!-- ══ АДМИН-ПАНЕЛЬ ═══════════════════════════════════════ -->
+<div id="admin-panel">
+  <button class="adm-close" onclick="document.getElementById('admin-panel').classList.remove('on')">✕</button>
+  <div class="adm-title">🛠 Режим разработчика <span class="adm-badge">ADMIN</span></div>
+
+  <div class="adm-row">
+    <button class="adm-btn" onclick="admCoins()" id="adm-inf-btn">💰 ∞ Монеты</button>
+    <button class="adm-btn" onclick="admUnlock()">🔓 Все уровни</button>
+    <button class="adm-btn" onclick="admBonus()">🎁 Бонус-уровень</button>
+    <button class="adm-btn" onclick="admComplete()">⚡ Пройти уровень</button>
+  </div>
+
+  <div class="adm-row">
+    <span style="color:#888;font-size:.7rem;align-self:center">Перейти к уровню:</span>
+    <div class="adm-inp-row">
+      <input class="adm-inp" id="adm-lvl-inp" type="number" min="1" max="110" value="1" placeholder="№">
+      <button class="adm-btn" onclick="admGoto()">→ Перейти</button>
+    </div>
+  </div>
+
+  <div class="adm-row">
+    <button class="adm-btn" onclick="admMenu()">🏠 Меню</button>
+    <button class="adm-btn" onclick="admStats()">📊 Стата</button>
+    <button class="adm-btn" onclick="admReload()">🔄 Перезагрузить</button>
+    <button class="adm-btn" style="border-color:#e74c3c;color:#e74c3c" onclick="admReset()">🗑 Сбросить всё</button>
+  </div>
+
+  <div id="adm-info" style="font-size:.65rem;color:#888;margin-top:4px;"></div>
 </div>
 <!-- ══ БОНУСНЫЙ УРОВЕНЬ ══════════════════════════════════ -->
 <!-- Вступление -->
@@ -3177,6 +3227,118 @@ applyTheme();
 updateSndBtn();
 initSplash();
 window.addEventListener('resize',buildGrid);
+
+// ══════════════════════════════════════
+// РЕЖИМ РАЗРАБОТЧИКА (ADMIN)
+// ══════════════════════════════════════
+let _adminTaps=0,_adminTimer=null,_admInfCoins=false;
+
+function adminTap(){
+  _adminTaps++;
+  clearTimeout(_adminTimer);
+  _adminTimer=setTimeout(()=>{_adminTaps=0;},800);
+  if(_adminTaps>=5){
+    _adminTaps=0;
+    const p=document.getElementById('admin-panel');
+    p.classList.toggle('on');
+    if(p.classList.contains('on')) admRefresh();
+  }
+}
+
+function admRefresh(){
+  const inp=document.getElementById('adm-lvl-inp');
+  if(inp) inp.value=lvl+1;
+  document.getElementById('adm-info').textContent=
+    'Уровень: '+(lvl+1)+'/'+LEVELS.length+
+    ' | Монеты: '+coins+
+    ' | maxLvl: '+(maxLvl+1)+
+    ' | Бонус: '+(bonusMode?'ВКЛ':'выкл')+
+    ' | ∞ монеты: '+(_admInfCoins?'ВКЛ':'выкл');
+  document.getElementById('adm-inf-btn').classList.toggle('active',_admInfCoins);
+}
+
+function admCoins(){
+  _admInfCoins=!_admInfCoins;
+  if(_admInfCoins){
+    coins=999999; save();
+    document.getElementById('cval').textContent=coins;
+    document.getElementById('m-cval').textContent=coins;
+  }
+  admRefresh();
+}
+
+// Перехватываем spend() чтобы при ∞ монетах не уменьшать
+const _origSpend=spend;
+function spend(n){
+  if(_admInfCoins){
+    coins=999999;
+    document.getElementById('cval').textContent=coins;
+    return true;
+  }
+  return _origSpend(n);
+}
+
+function admUnlock(){
+  maxLvl=LEVELS.length-1; save();
+  admRefresh();
+  alert('Все '+LEVELS.length+' уровней разблокированы!');
+}
+
+function admGoto(){
+  const n=parseInt(document.getElementById('adm-lvl-inp').value,10);
+  if(isNaN(n)||n<1||n>LEVELS.length){ alert('Уровень от 1 до '+LEVELS.length); return; }
+  lvl=n-1;
+  if(lvl>maxLvl) maxLvl=lvl;
+  save();
+  bonusMode=false; bonusLevelData=null;
+  if(bonusTmr){clearInterval(bonusTmr);bonusTmr=null;}
+  document.getElementById('bonus-timer-wrap').style.display='none';
+  document.getElementById('bonus-end').classList.remove('on');
+  document.getElementById('bonus-intro').classList.remove('on');
+  document.getElementById('toolbar').style.display='';
+  document.getElementById('dots').style.display='';
+  document.getElementById('admin-panel').classList.remove('on');
+  showScr(null); // показываем game-wrap
+  loadLevel();
+}
+
+function admBonus(){
+  document.getElementById('admin-panel').classList.remove('on');
+  // Запускаем бонус с текущей фазы
+  triggerBonus();
+}
+
+function admComplete(){
+  document.getElementById('admin-panel').classList.remove('on');
+  if(bonusMode){ finishBonus(); return; }
+  complete();
+}
+
+function admMenu(){
+  document.getElementById('admin-panel').classList.remove('on');
+  bonusMode=false; bonusLevelData=null;
+  if(bonusTmr){clearInterval(bonusTmr);bonusTmr=null;}
+  document.getElementById('bonus-timer-wrap').style.display='none';
+  document.getElementById('bonus-end').classList.remove('on');
+  document.getElementById('toolbar').style.display='';
+  document.getElementById('dots').style.display='';
+  doMenu();
+}
+
+function admStats(){
+  document.getElementById('admin-panel').classList.remove('on');
+  doStats();
+}
+
+function admReload(){
+  location.reload();
+}
+
+function admReset(){
+  if(!confirm('Сбросить весь прогресс? Это необратимо!')) return;
+  localStorage.clear();
+  location.reload();
+}
 </script>
 </body>
 </html>
