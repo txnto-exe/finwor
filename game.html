@@ -384,7 +384,7 @@ header {
 .cell.sel  { background: #c0c0c0; color: #1c1c1e; transform: scale(1.06); }
 .cell.used { background: #141416; color: #2c2c2e; }
 .cell.hint-pulse { animation: hpulse .6s ease-in-out 4; z-index:2; }
-@keyframes hpulse { 0%,100%{background:#272729;box-shadow:none;transform:scale(1)} 50%{background:#f6b93b;box-shadow:0 0 14px rgba(246,185,59,.75);transform:scale(1.13);color:#1a1a1c;} }
+@keyframes hpulse { 0%,100%{background:var(--cell-bg,#272729);box-shadow:none;transform:scale(1)} 50%{background:var(--hint-color,#f6b93b);box-shadow:0 0 14px var(--hint-glow,rgba(246,185,59,.75));transform:scale(1.13);color:var(--hint-stx,#1a1a1c);} }
 #wdisplay {
   margin-top: 16px; min-height: 30px;
   font-size: 1.2rem; font-weight: 600; letter-spacing: 3px;
@@ -574,10 +574,13 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 
 /* ── Кнопка темы ── */
 #theme-btn{
-  position:absolute;top:22px;left:22px;
-  background:none;border:none;cursor:pointer;
-  font-size:1.3rem;line-height:1;padding:6px;
-  opacity:.7;transition:opacity .2s,transform .1s;
+  position:absolute;top:16px;left:16px;
+  width:44px;height:44px;border-radius:50%;
+  background:#272729;border:none;cursor:pointer;
+  font-size:1.3rem;line-height:44px;padding:0;text-align:center;
+  transition:background .2s,transform .1s;
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+  z-index:10;
 }
 #theme-btn:active{transform:scale(.88);}
 
@@ -765,14 +768,31 @@ body.light .adm-btn{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 #theme-overlay{position:fixed;inset:0;z-index:489;display:none;}
 #theme-overlay.on{display:block;}
-#theme-panel{position:fixed;bottom:-110px;left:0;right:0;z-index:490;
-  background:#272729;border-radius:20px 20px 0 0;
-  padding:14px 20px 28px;transition:bottom .3s cubic-bezier(.4,0,.2,1);}
-#theme-panel.open{bottom:0;}
+#theme-panel{
+  position:absolute;
+  top:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%) scaleY(0);
+  transform-origin:top center;
+  opacity:0;
+  z-index:490;
+  background:#272729;
+  border-radius:18px;
+  padding:16px 20px 18px;
+  width:320px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  transition:transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.2s;
+  pointer-events:none;
+}
+#theme-panel.open{
+  transform:translateX(-50%) scaleY(1);
+  opacity:1;
+  pointer-events:auto;
+}
 #theme-panel-title{text-align:center;font-size:.68rem;color:#606060;
   letter-spacing:.9px;text-transform:uppercase;margin-bottom:13px;}
-#theme-panel-row{display:flex;justify-content:center;gap:13px;align-items:center;}
-.th-dot{width:46px;height:46px;border-radius:50%;cursor:pointer;
+#theme-panel-row{display:flex;justify-content:center;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+.th-dot{width:52px;height:52px;border-radius:50%;cursor:pointer;
   border:2.5px solid transparent;transition:border-color .15s,transform .12s;
   box-sizing:border-box;flex-shrink:0;}
 .th-dot.cur{border-color:#fff;transform:scale(1.18);}
@@ -801,7 +821,11 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 
 <!-- ══ ГЛАВНОЕ МЕНЮ ══════════════════════════════════════════ -->
 <div id="smenu" class="sovr hid" style="position:relative;">
-  <button id="theme-btn" onclick="openThemePicker()">🌙</button>
+  <button id="theme-btn" onclick="openThemePicker()">🎨</button>
+  <div id="theme-panel">
+    <div id="theme-panel-title">Тема</div>
+    <div id="theme-panel-row"></div>
+  </div>
   <button id="snd-btn" onclick="toggleSound()">🎵</button>
   <div id="menu-center">
     <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
@@ -2025,13 +2049,13 @@ function updateSndBtn(){
 
 // ── Тема ────────────────────────────────
 const THEMES=[
-  {id:'dark',   bg:'#1c1c1e',cell:'#272729',sel:'#c0c0c0',stx:'#1c1c1e',used:'#141416',txt:'#c0c0c0'},
-  {id:'light',  bg:'#c8c8c8',cell:'#b4b4b4',sel:'#1c1c1e',stx:'#c8c8c8',used:'#9a9a9a',txt:'#1c1c1e'},
-  {id:'ocean',  bg:'#0d1b2a',cell:'#1a3045',sel:'#4a9eff',stx:'#fff',   used:'#0a1520',txt:'#c0d8f0'},
-  {id:'forest', bg:'#0a1a0a',cell:'#1a3018',sel:'#50d060',stx:'#0a1a0a',used:'#081208',txt:'#a0d0a0'},
-  {id:'violet', bg:'#150d28',cell:'#251848',sel:'#9060f0',stx:'#fff',   used:'#0d0818',txt:'#c0a0f0'},
-  {id:'crimson',bg:'#280808',cell:'#401010',sel:'#ff5050',stx:'#fff',   used:'#180404',txt:'#f0a0a0'},
-  {id:'gold',   bg:'#1a1508',cell:'#2a2010',sel:'#f6b93b',stx:'#1a1508',used:'#100e04',txt:'#e0c880'},
+  {id:'dark',   unlock:0,   bg:'#1c1c1e',cell:'#272729',sel:'#c0c0c0',stx:'#1c1c1e',used:'#141416',txt:'#c0c0c0',accent:'#c8a028',confetti:['#c0c0c0','#a0a0a0','#e0e0e0','#808080','#d0d0d0']},
+  {id:'light',  unlock:0,   bg:'#c8c8c8',cell:'#b4b4b4',sel:'#1c1c1e',stx:'#c8c8c8',used:'#9a9a9a',txt:'#1c1c1e',accent:'#c8a028',confetti:['#1c1c1e','#3a3a3c','#505050','#2c2c2e','#404040']},
+  {id:'ocean',  unlock:50,  bg:'#0d1b2a',cell:'#1a3045',sel:'#4a9eff',stx:'#fff',   used:'#0a1520',txt:'#c0d8f0',accent:'#4a9eff',confetti:['#4a9eff','#00cfff','#0080ff','#a0d8ff','#ffffff']},
+  {id:'forest', unlock:80,  bg:'#0a1a0a',cell:'#1a3018',sel:'#50d060',stx:'#0a1a0a',used:'#081208',txt:'#a0d0a0',accent:'#50d060',confetti:['#50d060','#a0d0a0','#00a020','#80ff80','#c0ffc0']},
+  {id:'violet', unlock:120, bg:'#150d28',cell:'#251848',sel:'#9060f0',stx:'#fff',   used:'#0d0818',txt:'#c0a0f0',accent:'#9060f0',confetti:['#9060f0','#c0a0f0','#6030d0','#e0c0ff','#ffffff']},
+  {id:'crimson',unlock:160, bg:'#280808',cell:'#401010',sel:'#ff5050',stx:'#fff',   used:'#180404',txt:'#f0a0a0',accent:'#ff5050',confetti:['#ff5050','#f0a0a0','#cc0000','#ffaaaa','#ffffff']},
+  {id:'gold',   unlock:200, bg:'#1a1508',cell:'#2a2010',sel:'#f6b93b',stx:'#1a1508',used:'#100e04',txt:'#e0c880',accent:'#f6b93b',confetti:['#f6b93b','#e0c880','#d4a017','#ffe48a','#ffffff']},
 ];
 function themeCSS(t){
   return[
@@ -2067,8 +2091,14 @@ function applyTheme(){
   else if(t.id==='light'){document.body.classList.add('light');el.textContent='';}
   else{document.body.classList.add('th-'+t.id);el.textContent=themeCSS(t);}
   isLight=(t.id==='light');
+  document.documentElement.style.setProperty('--hint-color', t.sel);
+  document.documentElement.style.setProperty('--hint-glow', t.sel + '80');
+  document.documentElement.style.setProperty('--hint-stx', t.stx);
+  document.documentElement.style.setProperty('--cell-bg', t.cell);
   const b=document.getElementById('theme-btn');
-  if(b)b.textContent=t.id==='light'?'☀️':t.id==='dark'?'🌙':'🎨';
+  if(b){b.textContent='🎨';b.style.background=t.cell;}
+  const tp=document.getElementById('theme-panel');
+  if(tp)tp.style.background=t.bg;
   document.querySelectorAll('.th-dot').forEach(d=>d.classList.toggle('cur',d.dataset.th===curThemeId));
 }
 function openThemePicker(){
@@ -2089,17 +2119,66 @@ function selectTheme(id){
   closeThemePicker();
   if(navigator.vibrate)navigator.vibrate([8]);
 }
+function isThemeUnlocked(t){
+  if(t.unlock===0)return true;
+  const arr=JSON.parse(localStorage.getItem('fw_unlocked_themes')||'[]');
+  if(arr.includes(t.id))return true;
+  if(maxLvl>=t.unlock)return true;
+  return false;
+}
+function trySelectTheme(t){
+  if(isThemeUnlocked(t)){selectTheme(t.id);return;}
+  showThemeBuyPopup(t);
+}
+let pendingTheme=null;
+function showThemeBuyPopup(t){
+  pendingTheme=t;
+  document.getElementById('theme-buy-desc').textContent=`Открой за 500 🪙 или достигни уровня ${t.unlock}`;
+  const btn=document.getElementById('theme-buy-btn');
+  btn.disabled=coins<500;
+  btn.style.opacity=coins<500?'0.4':'1';
+  document.getElementById('theme-buy-popup').style.display='flex';
+}
+function closeThemeBuyPopup(){
+  document.getElementById('theme-buy-popup').style.display='none';
+  pendingTheme=null;
+}
+function buyTheme(){
+  if(!pendingTheme||!spend(500))return;
+  const arr=JSON.parse(localStorage.getItem('fw_unlocked_themes')||'[]');
+  if(!arr.includes(pendingTheme.id))arr.push(pendingTheme.id);
+  localStorage.setItem('fw_unlocked_themes',JSON.stringify(arr));
+  closeThemeBuyPopup();
+  selectTheme(pendingTheme.id);
+}
 function renderThemePicker(){
   const row=document.getElementById('theme-panel-row');
-  if(row.children.length)return;
+  row.innerHTML='';
+  const names={dark:'Тёмная',light:'Светлая',ocean:'Океан',forest:'Лес',violet:'Фиолет',crimson:'Алый',gold:'Золото'};
   THEMES.forEach(t=>{
+    const unlocked=isThemeUnlocked(t);
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;';
+    wrap.onclick=()=>trySelectTheme(t);
     const d=document.createElement('div');
     d.className='th-dot'+(curThemeId===t.id?' cur':'');
     d.dataset.th=t.id;
     d.title=t.id;
     d.style.background=`linear-gradient(135deg,${t.bg} 50%,${t.sel} 50%)`;
-    d.onclick=()=>selectTheme(t.id);
-    row.appendChild(d);
+    d.style.position='relative';
+    if(!unlocked){
+      d.style.filter='brightness(0.4)';
+      const lock=document.createElement('div');
+      lock.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem;pointer-events:none;';
+      lock.textContent='🔒';
+      d.appendChild(lock);
+    }
+    const name=document.createElement('div');
+    name.textContent=names[t.id]||t.id;
+    name.style.cssText='font-size:0.58rem;color:#888;text-align:center;';
+    wrap.appendChild(d);
+    wrap.appendChild(name);
+    row.appendChild(wrap);
   });
 }
 
@@ -2110,9 +2189,8 @@ function launchConfetti(){
   cv.style.display='block';
   cv.width=window.innerWidth;cv.height=window.innerHeight;
   const ctx=cv.getContext('2d');
-  const cols=isLight
-    ?['#1c1c1e','#3a3a3c','#505050','#2c2c2e','#404040']
-    :['#c0c0c0','#a0a0a0','#e0e0e0','#808080','#d0d0d0'];
+  const th=THEMES.find(t=>t.id===curThemeId)||THEMES[0];
+  const cols=th.confetti||['#c0c0c0','#a0a0a0','#e0e0e0'];
   const pts=Array.from({length:75},()=>({
     x:Math.random()*cv.width,y:-30-Math.random()*100,
     w:Math.random()*10+4,h:Math.random()*5+3,
@@ -2383,12 +2461,18 @@ function admReset(){
   location.reload();
 }
 </script>
-<!-- ══ АДМИН-ПАНЕЛЬ (вне game-wrap, всегда поверх всего) ═══ -->
-<div id="theme-overlay" onclick="closeThemePicker()"></div>
-<div id="theme-panel">
-  <div id="theme-panel-title">Тема</div>
-  <div id="theme-panel-row"></div>
+<!-- ══ ПОПАП ПОКУПКИ ТЕМЫ ═══════════════════════════════════ -->
+<div id="theme-buy-popup" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
+  <div id="theme-buy-box" style="background:#272729;border-radius:22px;padding:28px 24px;width:290px;text-align:center;">
+    <div id="theme-buy-title" style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Тема заблокирована</div>
+    <div id="theme-buy-desc" style="font-size:0.85rem;color:#888;margin-bottom:20px;line-height:1.4;"></div>
+    <button id="theme-buy-btn" onclick="buyTheme()" style="width:100%;padding:13px;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;">Купить 500 🪙</button>
+    <button onclick="closeThemeBuyPopup()" style="width:100%;padding:11px;border:none;border-radius:14px;background:transparent;color:#888;font-size:0.9rem;cursor:pointer;">Закрыть</button>
+  </div>
 </div>
+<!-- ══ ОВЕРЛЕЙ ТЕМЫ ══════════════════════════════════════════ -->
+<div id="theme-overlay" onclick="closeThemePicker()"></div>
+<!-- ══ АДМИН-ПАНЕЛЬ (вне game-wrap, всегда поверх всего) ═══ -->
 <div id="admin-panel">
   <button class="adm-close" onclick="document.getElementById('admin-panel').classList.remove('on')">✕</button>
   <div class="adm-title">🛠 Режим разработчика <span class="adm-badge">ADMIN</span></div>
