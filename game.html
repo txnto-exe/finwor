@@ -438,8 +438,8 @@ header {
    Палитра: #1C1C1E (фон) · #C0C0C0 (текст/акцент)
 ══════════════════════════════════════ */
 @keyframes scrIn {
-  from{opacity:0;transform:scale(.97) translateY(8px)}
-  to  {opacity:1;transform:scale(1)   translateY(0)}
+  from{opacity:0;transform:translateY(12px)}
+  to  {opacity:1;transform:translateY(0)}
 }
 @keyframes olIn {
   from{opacity:0;transform:scale(.95)}
@@ -790,7 +790,7 @@ body.light .bns-btn{color:#fff;background:#c8a028;}
 body.light #admin-panel{background:#e8e8e8;border-color:#c8a028;}
 body.light .adm-btn{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
-#theme-overlay{position:fixed;inset:0;z-index:489;display:none;}
+#theme-overlay{position:fixed;inset:0;z-index:502;display:none;}
 #theme-overlay.on{display:block;}
 #theme-panel{
   position:fixed;
@@ -799,11 +799,11 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   transform:scaleY(0) translateY(-10px);
   transform-origin:top left;
   opacity:0;
-  z-index:490;
+  z-index:503;
   background:#1e1e22;
-  border-radius:26px;
-  padding:14px 12px 16px;
-  width:68px;
+  border-radius:22px;
+  padding:10px 9px 12px;
+  width:58px;
   box-shadow:0 12px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06);
   transition:transform 0.3s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
   pointer-events:none;
@@ -813,21 +813,17 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   opacity:1;
   pointer-events:auto;
 }
-#theme-panel-title{
-  text-align:center;font-size:.52rem;color:#555;
-  letter-spacing:1px;text-transform:uppercase;
-  margin-bottom:12px;font-weight:600;
-}
+#theme-panel-title{display:none;}
 #theme-panel-row{
   display:flex;flex-direction:column;
-  align-items:center;gap:10px;
+  align-items:center;gap:6px;
 }
 .th-dot{
-  width:48px;height:48px;border-radius:50%;cursor:pointer;
+  width:40px;height:40px;border-radius:50%;cursor:pointer;
   transition:transform .15s,box-shadow .18s,outline .15s;
   flex-shrink:0;overflow:hidden;
   box-shadow:0 3px 10px rgba(0,0,0,.5);
-  position:relative;outline:2.5px solid transparent;outline-offset:2px;
+  position:relative;outline:2px solid transparent;outline-offset:2px;
 }
 .th-dot.cur{
   outline-color:rgba(255,255,255,.75);
@@ -835,10 +831,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   transform:scale(1.07);
 }
 .th-dot:active{transform:scale(.88);}
-.th-dot-name{
-  font-size:.48rem;color:#555;text-align:center;
-  margin-top:1px;letter-spacing:.2px;
-}
+.th-dot-name{display:none;}
 </style>
 </head>
 <body>
@@ -864,10 +857,6 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 <!-- ══ ГЛАВНОЕ МЕНЮ ══════════════════════════════════════════ -->
 <div id="smenu" class="sovr hid" style="position:relative;">
   <button id="theme-btn" onclick="openThemePicker()">🎨</button>
-  <div id="theme-panel">
-    <div id="theme-panel-title">ТЕМЫ</div>
-    <div id="theme-panel-row"></div>
-  </div>
   <button id="snd-btn" onclick="toggleSound()">🎵</button>
   <div id="menu-center">
     <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
@@ -2223,8 +2212,8 @@ function renderThemePicker(){
     const isCur=curThemeId===t.id;
     d.className='th-dot'+(isCur?' cur':'');
     d.dataset.th=t.id;
-    // Красивый диагональный градиент: bg слева-снизу, sel справа-сверху
-    d.style.background=`linear-gradient(135deg, ${t.sel} 50%, ${t.bg} 50%)`;
+    // Диагональный градиент: основной цвет фона сверху, акцентный снизу
+    d.style.background=`linear-gradient(135deg, ${t.bg} 50%, ${t.sel} 50%)`;
     d.style.position='relative';
     if(isCur){
       d.style.boxShadow=`0 0 0 3px ${t.sel}66, 0 6px 20px ${t.sel}44`;
@@ -2536,6 +2525,10 @@ function admReset(){
   </div>
 </div>
 <!-- ══ ОВЕРЛЕЙ ТЕМЫ ══════════════════════════════════════════ -->
+<div id="theme-panel">
+  <div id="theme-panel-title">ТЕМЫ</div>
+  <div id="theme-panel-row"></div>
+</div>
 <div id="theme-overlay" onclick="closeThemePicker()"></div>
 <!-- ══ АДМИН-ПАНЕЛЬ (вне game-wrap, всегда поверх всего) ═══ -->
 <div id="admin-panel">
