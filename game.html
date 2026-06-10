@@ -499,6 +499,7 @@ header {
 .mbtn:active{transform:scale(.92) translateY(2px);opacity:.85;box-shadow:0 1px 6px rgba(0,0,0,.2);}
 .mbtn-p{background:#c0c0c0;color:#1c1c1e;}
 .mbtn-s{background:#2c2c2e;color:#c0c0c0;}
+.mbtn-ad{background:#2c2c2e;color:#f6b93b;font-size:.88rem;}
 
 /* Выбор уровня */
 #slvl{padding-bottom:40px;}
@@ -563,6 +564,9 @@ body.light #overlay .ot{color:#1c1c1e!important;}
 body.light #overlay .ol,body.light #overlay .ow{color:#707070!important;}
 body.light .bnext,body.light .mbtn-p{background:#1c1c1e!important;color:#c8c8c8!important;}
 body.light .mbtn-s{background:#a8a8a8!important;color:#1c1c1e!important;}
+body.light .mbtn-ad{background:#a8a8a8!important;color:#c8a028!important;}
+body.light .tbtn-ad{background:#b4b4b4!important;color:#c8a028!important;}
+body.light .tbtn-ad .tn{color:#60606099!important;}
 body.light .mbtn-icon{color:#707070!important;}
 body.light .lcard{background:#b4b4b4!important;}
 body.light .lcard .lnum,body.light .lcard .lico{color:#707070!important;}
@@ -898,6 +902,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
     <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn-icon" onclick="sndBtnStats();doStats()">📊 Статистика</button>
+    <button class="mbtn mbtn-ad" onclick="showRewardedAd()">📺 +100 монет</button>
   </div>
 </div>
 
@@ -2198,6 +2203,8 @@ function themeCSS(t){
     `body.th-${t.id} #spl,body.th-${t.id} .sovr,body.th-${t.id} #overlay{background:${t.bg}!important}`,
     `body.th-${t.id} .mbtn-p,body.th-${t.id} .bnext{background:${t.sel}!important;color:${t.stx}!important}`,
     `body.th-${t.id} .mbtn-s,body.th-${t.id} .tbtn,body.th-${t.id} .lcard,body.th-${t.id} #ms,body.th-${t.id} .tut-box,body.th-${t.id} .stat-card,body.th-${t.id} .adm-btn{background:${t.cell}!important}`,
+    `body.th-${t.id} .mbtn-ad,body.th-${t.id} .tbtn-ad{background:${t.cell}!important;color:${t.accent}!important}`,
+    `body.th-${t.id} .tbtn-ad .tn{color:${t.txt}66!important}`,
     `body.th-${t.id} .lcard.cur,body.th-${t.id} .tut-cell.th{background:${t.sel}!important;color:${t.stx}!important}`,
     `body.th-${t.id} .slvl-hdr,body.th-${t.id} #admin-panel,body.th-${t.id} #theme-panel,body.th-${t.id} #bonus-intro,body.th-${t.id} #bonus-end{background:${t.bg}!important}`,
     `body.th-${t.id} .dot.on,body.th-${t.id} .sp-fill,body.th-${t.id} #arch-fill{background:${t.sel}!important}`,
