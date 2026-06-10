@@ -319,6 +319,7 @@ body {
 #game-wrap {
   display: flex; flex-direction: column; align-items: center;
   width: 100%; max-width: 480px; flex: 1;
+  padding-bottom: 140px;
 }
 #game-center {
   flex: 1; display: flex; flex-direction: column;
@@ -403,10 +404,16 @@ header {
 #wdisplay.dim { color: #505050; font-size: .82rem; letter-spacing: .5px; }
 #wdisplay.warn { color: #606060; font-size: .82rem; letter-spacing: .5px; }
 #toolbar {
-  position: fixed; bottom: 0; left: 0; right: 0;
+  position: fixed; bottom: 60px; left: 0; right: 0;
   display: flex; gap: 8px; justify-content: center;
-  padding: 10px 16px 20px;
+  padding: 10px 16px 14px;
   background: linear-gradient(to top, #1c1c1e 70%, transparent);
+}
+#ad-banner {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  background: #111113; border-top: 1px solid #2a2a2e;
+  z-index: 100;
 }
 .tbtn {
   flex: 0 1 110px; background: #272729; border: none; border-radius: 14px;
@@ -1021,6 +1028,9 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   <button class="tbtn" id="t-sk" onclick="tSkip()">
     <span class="ti">⏭</span><span class="tn">Пропуск</span><span class="tp">250 🪙</span>
   </button>
+</div>
+<div id="ad-banner">
+  <span style="color:#333;font-size:.65rem;letter-spacing:1px;">РЕКЛАМА</span>
 </div>
 
 <div id="overlay">
@@ -1755,6 +1765,7 @@ function startBonus(){
   bonusFound = new Set();
   used = new Set(); sel = []; found = [];
   document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('ad-banner').style.display = 'none';
   document.getElementById('dots').style.display = 'none';
   loadLevel();
   // Запускаем таймер под сеткой
@@ -1790,6 +1801,7 @@ function continueAfterBonus(){
   bonusMode = false; bonusLevelData = null;
   if(bonusTmr){clearInterval(bonusTmr);bonusTmr=null;}
   document.getElementById('toolbar').style.display = '';
+  document.getElementById('ad-banner').style.display = '';
   document.getElementById('dots').style.display = '';
   loadLevel(); // lvl уже указывает на следующий уровень
 }
@@ -2112,6 +2124,8 @@ function themeCSS(t){
     `body.th-${t.id} .tut-cell{background:${t.cell}!important;color:${t.txt}!important}`,
     `body.th-${t.id} .tut-bar-fill,body.th-${t.id} .tut-btn{background:${t.sel}!important;color:${t.stx}!important}`,
     `@keyframes hpulse{0%,100%{background:${t.cell};box-shadow:none;transform:scale(1)}50%{background:${t.sel};box-shadow:0 0 22px ${t.sel}cc,0 0 8px ${t.sel}88;transform:scale(1.18);color:${t.stx}}}`,
+    `body.th-${t.id} #toolbar{background:linear-gradient(to top,${t.bg} 70%,transparent)!important}`,
+    `body.th-${t.id} #ad-banner{background:${t.bg}!important;border-top:1px solid ${t.cell}!important}`,
   ].join('\n');
 }
 let curThemeId=localStorage.getItem('fw_theme_id')||'dark';
@@ -2297,6 +2311,11 @@ function showScr(id){
   });
   const gw=document.getElementById('game-wrap');
   if(gw)gw.style.display=id===null?'':'none';
+  const inGame=id===null;
+  const tb=document.getElementById('toolbar');
+  const ab=document.getElementById('ad-banner');
+  if(tb)tb.style.display=inGame?'':'none';
+  if(ab)ab.style.display=inGame?'':'none';
 }
 
 function doMenu(){
