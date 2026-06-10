@@ -393,7 +393,7 @@ header {
 .cell.hint-pulse { animation: hpulse .55s cubic-bezier(.34,1.56,.64,1) 4; z-index:2; }
 @keyframes hpulse {
   0%,100%{background:var(--cell-bg,#272729);box-shadow:none;transform:scale(1)}
-  50%{background:var(--hint-color,#f6b93b);box-shadow:0 0 18px var(--hint-glow,rgba(246,185,59,.8));transform:scale(1.18);color:var(--hint-stx,#1a1a1c);}
+  50%{background:var(--hint-color,#f6b93b);box-shadow:0 0 22px var(--hint-glow,rgba(246,185,59,.8)),0 0 8px var(--hint-glow,rgba(246,185,59,.5));transform:scale(1.18);color:var(--hint-stx,#1a1a1c);}
 }
 #wdisplay {
   margin-top: 16px; min-height: 30px;
@@ -2111,7 +2111,7 @@ function themeCSS(t){
     `body.th-${t.id} .m-logo text,body.th-${t.id} .stats-logo text,body.th-${t.id} #spl-logo text{fill:${t.txt}!important}`,
     `body.th-${t.id} .tut-cell{background:${t.cell}!important;color:${t.txt}!important}`,
     `body.th-${t.id} .tut-bar-fill,body.th-${t.id} .tut-btn{background:${t.sel}!important;color:${t.stx}!important}`,
-    `@keyframes hpulse{0%,100%{background:${t.cell};box-shadow:none;transform:scale(1)}50%{background:${t.sel};box-shadow:0 0 14px rgba(0,0,0,.5);transform:scale(1.13);color:${t.stx}}}`,
+    `@keyframes hpulse{0%,100%{background:${t.cell};box-shadow:none;transform:scale(1)}50%{background:${t.sel};box-shadow:0 0 22px ${t.sel}cc,0 0 8px ${t.sel}88;transform:scale(1.18);color:${t.stx}}}`,
   ].join('\n');
 }
 let curThemeId=localStorage.getItem('fw_theme_id')||'dark';
