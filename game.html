@@ -307,6 +307,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>FinWor</title>
+<script src="https://yandex.ru/ads/system/context.js" async></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { background: #1c1c1e; }
@@ -886,6 +887,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
     <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn-icon" onclick="sndBtnStats();doStats()">📊 Статистика</button>
+    <button class="mbtn-icon mbtn-ad" id="btn-rewarded" onclick="showRewardedAd()">📺 +100 🪙 за рекламу</button>
   </div>
 </div>
 
@@ -1054,8 +1056,17 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 </div><!-- /game-wrap -->
 
 <div id="ad-banner">
-  <span style="color:#444;font-size:.65rem;letter-spacing:1px;">РЕКЛАМА</span>
+  <div id="yandex_rtb_R-M-19416537-3"></div>
 </div>
+<script>
+window.yaContextCb = window.yaContextCb || [];
+window.yaContextCb.push(()=>{
+  Ya.Context.AdvManager.render({
+    blockId: "R-M-19416537-3",
+    renderTo: "yandex_rtb_R-M-19416537-3"
+  });
+});
+</script>
 
 <script>
 // ══════════════════════════════════════
@@ -1921,17 +1932,76 @@ function complete(){
   document.getElementById('owords').textContent=found.join(' · ');
   document.getElementById('overlay').classList.add('on');
 }
+let _levelsAfterAd = 0;
 function nextLevel(){
   const wasLvl = lvl;
   lvl=(lvl+1<LEVELS.length)?lvl+1:0;
   save();
   document.getElementById('overlay').classList.remove('on');
+  _levelsAfterAd++;
+  // Каждые 2 уровня — межуровневая реклама
+  if(_levelsAfterAd >= 2){
+    _levelsAfterAd = 0;
+    showInterstitialAd();
+    return;
+  }
   // Каждые 10 пройденных уровней → бонус
   if((wasLvl+1)%10===9){
     triggerBonus();
   } else {
     loadLevel();
   }
+}
+
+function _afterInterstitial(){
+  const wasLvl = lvl - 1;
+  if(wasLvl >= 0 && (wasLvl+1)%10===9){
+    triggerBonus();
+  } else {
+    loadLevel();
+  }
+}
+
+function showInterstitialAd(){
+  if(typeof Ya === 'undefined' || !Ya.Context){
+    _afterInterstitial(); return;
+  }
+  window.yaContextCb = window.yaContextCb || [];
+  window.yaContextCb.push(()=>{
+    Ya.Context.AdvManager.render({
+      blockId: "R-M-19416537-1",
+      type: "fullscreen",
+      platform: "touch",
+      onClose: function(){ _afterInterstitial(); },
+      onError: function(){ _afterInterstitial(); }
+    });
+  });
+}
+
+function showRewardedAd(){
+  if(typeof Ya === 'undefined' || !Ya.Context){
+    alert('Реклама недоступна'); return;
+  }
+  const btn = document.getElementById('btn-rewarded');
+  if(btn) btn.disabled = true;
+  window.yaContextCb = window.yaContextCb || [];
+  window.yaContextCb.push(()=>{
+    Ya.Context.AdvManager.render({
+      blockId: "R-M-19416537-2",
+      type: "fullscreen",
+      platform: "touch",
+      onClose: function(videoShown){
+        if(btn) btn.disabled = false;
+        if(videoShown){
+          addCoins(100);
+          // Кулдаун 5 минут
+          if(btn){ btn.disabled = true; btn.textContent = '⏳ Доступно через 5 мин'; }
+          setTimeout(()=>{ if(btn){ btn.disabled = false; btn.textContent = '📺 +100 🪙 за рекламу'; }}, 5*60*1000);
+        }
+      },
+      onError: function(){ if(btn) btn.disabled = false; }
+    });
+  });
 }
 
 // ══════════════════════════════════════
