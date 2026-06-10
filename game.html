@@ -413,7 +413,7 @@ header {
   position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
   display: flex; align-items: center; justify-content: center;
   background: #111113; border-top: 1px solid #2a2a2e;
-  z-index: 100;
+  z-index: 501;
 }
 .tbtn {
   flex: 0 1 110px; background: #272729; border: none; border-radius: 14px;
@@ -456,6 +456,7 @@ header {
   position:fixed;inset:0;background:#1c1c1e;z-index:500;
   display:flex;flex-direction:column;align-items:center;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-bottom:64px;
 }
 .sovr.hid{display:none;}
 .sovr:not(.hid){animation:scrIn .35s cubic-bezier(.34,1.56,.64,1) both;}
@@ -1029,9 +1030,6 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     <span class="ti">⏭</span><span class="tn">Пропуск</span><span class="tp">250 🪙</span>
   </button>
 </div>
-<div id="ad-banner">
-  <span style="color:#333;font-size:.65rem;letter-spacing:1px;">РЕКЛАМА</span>
-</div>
 
 <div id="overlay">
   <div class="ol">Уровень <span id="onum">1</span> пройден</div>
@@ -1054,6 +1052,10 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   <button class="bns-btn" onclick="continueAfterBonus()">Продолжить →</button>
 </div>
 </div><!-- /game-wrap -->
+
+<div id="ad-banner">
+  <span style="color:#444;font-size:.65rem;letter-spacing:1px;">РЕКЛАМА</span>
+</div>
 
 <script>
 // ══════════════════════════════════════
@@ -1765,7 +1767,6 @@ function startBonus(){
   bonusFound = new Set();
   used = new Set(); sel = []; found = [];
   document.getElementById('toolbar').style.display = 'none';
-  document.getElementById('ad-banner').style.display = 'none';
   document.getElementById('dots').style.display = 'none';
   loadLevel();
   // Запускаем таймер под сеткой
@@ -1801,7 +1802,6 @@ function continueAfterBonus(){
   bonusMode = false; bonusLevelData = null;
   if(bonusTmr){clearInterval(bonusTmr);bonusTmr=null;}
   document.getElementById('toolbar').style.display = '';
-  document.getElementById('ad-banner').style.display = '';
   document.getElementById('dots').style.display = '';
   loadLevel(); // lvl уже указывает на следующий уровень
 }
@@ -2313,9 +2313,7 @@ function showScr(id){
   if(gw)gw.style.display=id===null?'':'none';
   const inGame=id===null;
   const tb=document.getElementById('toolbar');
-  const ab=document.getElementById('ad-banner');
   if(tb)tb.style.display=inGame?'':'none';
-  if(ab)ab.style.display=inGame?'':'none';
 }
 
 function doMenu(){
