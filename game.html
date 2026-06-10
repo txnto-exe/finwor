@@ -643,6 +643,17 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
   display:flex;align-items:center;justify-content:center;gap:6px;
 }
 .mbtn-icon:active{opacity:.6;transform:scale(.93);}
+.tbtn-ad{
+  flex:0 1 110px;background:#272729;border:none;border-radius:14px;
+  padding:10px 6px 8px;display:flex;flex-direction:column;
+  align-items:center;gap:2px;cursor:pointer;font-family:inherit;
+  font-size:.67rem;font-weight:700;color:#f6b93b;
+  transition:opacity .2s,transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;
+}
+.tbtn-ad:active:not([disabled]){transform:scale(.91) translateY(2px);}
+.tbtn-ad[disabled]{opacity:.35;cursor:default;}
+.tbtn-ad .ti{font-size:1.1rem;line-height:1;}
+.tbtn-ad .tn{font-size:.58rem;font-weight:500;color:#606060;margin-top:1px;}
 
 /* ── Конфетти ── */
 #confetti-cv{
@@ -887,7 +898,6 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
     <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn-icon" onclick="sndBtnStats();doStats()">📊 Статистика</button>
-    <button class="mbtn-icon mbtn-ad" id="btn-rewarded" onclick="showRewardedAd()">📺 +100 🪙 за рекламу</button>
   </div>
 </div>
 
@@ -1030,6 +1040,9 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   </button>
   <button class="tbtn" id="t-sk" onclick="tSkip()">
     <span class="ti">⏭</span><span class="tn">Пропуск</span><span class="tp">250 🪙</span>
+  </button>
+  <button class="tbtn-ad" id="btn-rewarded" onclick="showRewardedAd()">
+    <span class="ti">📺</span><span class="tn">+100 монет</span>
   </button>
 </div>
 
