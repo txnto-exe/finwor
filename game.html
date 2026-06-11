@@ -1990,14 +1990,15 @@ function showInterstitialAd(){
   if(typeof Ya === 'undefined' || !Ya.Context){
     _afterInterstitial(); return;
   }
+  const fallback = setTimeout(()=>{ _afterInterstitial(); }, 5000);
   window.yaContextCb = window.yaContextCb || [];
   window.yaContextCb.push(()=>{
     Ya.Context.AdvManager.render({
       blockId: "R-M-19416537-1",
       type: "fullscreen",
       platform: "touch",
-      onClose: function(){ _afterInterstitial(); },
-      onError: function(){ _afterInterstitial(); }
+      onClose: function(){ clearTimeout(fallback); _afterInterstitial(); },
+      onError: function(){ clearTimeout(fallback); _afterInterstitial(); }
     });
   });
 }
