@@ -2512,6 +2512,23 @@ updateSndBtn();
 initSplash();
 window.addEventListener('resize',buildGrid);
 
+// Кнопка "Назад" Android
+window.addEventListener('popstate', function(){
+  const overlay = document.getElementById('overlay');
+  if(overlay && overlay.classList.contains('on')){
+    overlay.classList.remove('on'); return;
+  }
+  const screens = ['slvl','sstats'];
+  for(const id of screens){
+    const el = document.getElementById(id);
+    if(el && !el.classList.contains('hid')){ doMenu(); return; }
+  }
+  const menu = document.getElementById('smenu');
+  if(menu && !menu.classList.contains('hid')){ return; }
+  doMenu();
+});
+history.pushState(null, '', location.href);
+
 // ══════════════════════════════════════
 // РЕЖИМ РАЗРАБОТЧИКА (ADMIN)
 // ══════════════════════════════════════
