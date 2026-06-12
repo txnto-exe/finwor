@@ -307,7 +307,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>FinWor</title>
-<script src="https://yandex.ru/ads/system/context.js" async></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1c1c1e">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1079,18 +1078,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 </div>
 </div><!-- /game-wrap -->
 
-<div id="ad-banner">
-  <div id="yandex_rtb_R-M-19416537-3"></div>
-</div>
-<script>
-window.yaContextCb = window.yaContextCb || [];
-window.yaContextCb.push(()=>{
-  Ya.Context.AdvManager.render({
-    blockId: "R-M-19416537-3",
-    renderTo: "yandex_rtb_R-M-19416537-3"
-  });
-});
-</script>
+<div id="ad-banner"></div>
 
 <script>
 // ══════════════════════════════════════
@@ -1999,46 +1987,30 @@ function _afterInterstitial(){
 }
 
 function showInterstitialAd(){
-  if(!navigator.onLine || typeof Ya === 'undefined' || !Ya.Context){
-    _afterInterstitial(); return;
+  if(window.AndroidAds){
+    window.onInterstitialClosed = function(){ _afterInterstitial(); };
+    AndroidAds.showInterstitial();
+  } else {
+    _afterInterstitial();
   }
-  const fallback = setTimeout(()=>{ _afterInterstitial(); }, 5000);
-  window.yaContextCb = window.yaContextCb || [];
-  window.yaContextCb.push(()=>{
-    Ya.Context.AdvManager.render({
-      blockId: "R-M-19416537-1",
-      type: "fullscreen",
-      platform: "touch",
-      onClose: function(){ clearTimeout(fallback); _afterInterstitial(); },
-      onError: function(){ clearTimeout(fallback); _afterInterstitial(); }
-    });
-  });
 }
 
 function showRewardedAd(){
-  if(typeof Ya === 'undefined' || !Ya.Context){
-    alert('Реклама недоступна'); return;
+  if(window.AndroidAds){
+    const btn = document.getElementById('btn-rewarded');
+    if(btn) btn.disabled = true;
+    window.onRewardedEarned = function(){
+      addCoins(100);
+      if(btn){ btn.disabled = true; btn.textContent = '⏳ Доступно через 5 мин'; }
+      setTimeout(()=>{ if(btn){ btn.disabled = false; btn.textContent = '📺 +100 🪙 за рекламу'; }}, 5*60*1000);
+    };
+    window.onRewardedFailed = function(){
+      if(btn) btn.disabled = false;
+    };
+    AndroidAds.showRewarded();
+  } else {
+    alert('Реклама недоступна');
   }
-  const btn = document.getElementById('btn-rewarded');
-  if(btn) btn.disabled = true;
-  window.yaContextCb = window.yaContextCb || [];
-  window.yaContextCb.push(()=>{
-    Ya.Context.AdvManager.render({
-      blockId: "R-M-19416537-2",
-      type: "fullscreen",
-      platform: "touch",
-      onClose: function(videoShown){
-        if(btn) btn.disabled = false;
-        if(videoShown){
-          addCoins(100);
-          // Кулдаун 5 минут
-          if(btn){ btn.disabled = true; btn.textContent = '⏳ Доступно через 5 мин'; }
-          setTimeout(()=>{ if(btn){ btn.disabled = false; btn.textContent = '📺 +100 🪙 за рекламу'; }}, 5*60*1000);
-        }
-      },
-      onError: function(){ if(btn) btn.disabled = false; }
-    });
-  });
 }
 
 // ══════════════════════════════════════
