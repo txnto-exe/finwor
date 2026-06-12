@@ -1916,10 +1916,6 @@ function wrongFx(){
 // Инструменты
 // ══════════════════════════════════════
 function tHint(){
-  const dbg=document.createElement('div');
-  dbg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;color:#fff;padding:16px 24px;border-radius:12px;z-index:9999;font-size:1rem;text-align:center;';
-  dbg.textContent='монет: '+coins+' | нужно: 50';
-  document.body.appendChild(dbg);setTimeout(()=>dbg.remove(),2000);
   if(!spend(50))return;
   if(navigator.vibrate)navigator.vibrate([20]);
   const rem=CL().words.filter(w=>!found.includes(w));
@@ -2227,7 +2223,7 @@ function applyTheme(){
   document.documentElement.style.setProperty('--hint-stx', t.stx);
   document.documentElement.style.setProperty('--cell-bg', t.cell);
   const b=document.getElementById('theme-btn');
-  if(b){b.style.background=t.cell;b.style.boxShadow=`0 2px 12px ${t.sel}44`;}
+  if(b){b.style.background=t.cell;b.style.boxShadow='0 2px 12px rgba(0,0,0,.5)';}
   const tp=document.getElementById('theme-panel');
   if(tp){tp.style.background=t.bg;tp.style.boxShadow=`0 12px 48px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.07),0 0 24px ${t.sel}22`;}
   document.querySelectorAll('.th-dot').forEach(d=>d.classList.toggle('cur',d.dataset.th===curThemeId));
@@ -2498,6 +2494,7 @@ window.addEventListener('resize',buildGrid);
 
 // Кнопка "Назад" Android
 window.addEventListener('popstate', function(){
+  history.pushState(null, '', '#');
   const overlay = document.getElementById('overlay');
   if(overlay && overlay.classList.contains('on')){
     overlay.classList.remove('on'); return;
