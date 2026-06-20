@@ -315,7 +315,7 @@
 <meta name="apple-mobile-web-app-title" content="FinWor">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { background: #1c1c1e; }
+html, body { background: #1c1c1e; overflow: hidden; height: 100%; overscroll-behavior: none; touch-action: pan-x pan-y; }
 body {
   min-height: 100vh; color: #c0c0c0;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
@@ -397,10 +397,11 @@ header {
 }
 .cell.sel  { background: #c0c0c0; color: #1c1c1e; transform: scale(1.12); box-shadow: 0 4px 16px rgba(0,0,0,.4); }
 .cell.used { background: #141416; color: #2c2c2e; transform: scale(.96); transition: background .18s, color .18s, transform .22s cubic-bezier(.34,1.56,.64,1); }
-.cell.hint-pulse { animation: hpulse .55s cubic-bezier(.34,1.56,.64,1) 4; z-index:2; }
+.cell.hint-pulse { animation: hpulse 0.9s cubic-bezier(.4,0,.2,1) 3; z-index:2; transition: none; }
 @keyframes hpulse {
-  0%,100%{background:var(--cell-bg,#272729);box-shadow:none;transform:scale(1)}
-  50%{background:var(--hint-color,#f6b93b);box-shadow:0 0 22px var(--hint-glow,rgba(246,185,59,.8)),0 0 8px var(--hint-glow,rgba(246,185,59,.5));transform:scale(1.18);color:var(--hint-stx,#1a1a1c);}
+  0%   {transform:scale(1);   box-shadow:0 0 0 0 var(--hint-color,#f6b93b);}
+  45%  {transform:scale(1.2); box-shadow:0 0 0 5px var(--hint-color,#f6b93b), 0 0 28px var(--hint-glow,rgba(246,185,59,.7));}
+  100% {transform:scale(1);   box-shadow:0 0 0 0 transparent;}
 }
 #wdisplay {
   margin-top: 16px; min-height: 30px;
@@ -416,9 +417,8 @@ header {
   background: linear-gradient(to top, #1c1c1e 70%, transparent);
 }
 #ad-banner {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+  position: fixed; bottom: 0; left: 0; right: 0;
   display: flex; align-items: center; justify-content: center;
-  background: #111113; border-top: 1px solid #2a2a2e;
   z-index: 501;
 }
 .tbtn {
@@ -485,14 +485,14 @@ header {
 @keyframes splFade{to{opacity:0;transform:scale(.95)}}
 
 /* Главное меню */
-#smenu{padding:0;}
+#smenu{padding:0;overflow:hidden;}
 #menu-center{
   min-height:100vh;min-height:100dvh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:12px;width:100%;max-width:380px;padding:60px 28px;
+  gap:8px;width:100%;max-width:380px;padding:40px 28px 80px;
 }
-.m-logo{margin-bottom:6px;}
-.m-title{font-size:2.1rem;font-weight:700;letter-spacing:-1px;color:#c0c0c0;}
+.m-logo{margin-bottom:2px;}
+.m-title{font-size:1.9rem;font-weight:700;letter-spacing:-1px;color:#c0c0c0;}
 .m-sub{font-size:.72rem;color:#505050;font-weight:500;letter-spacing:.8px;text-transform:uppercase;}
 .m-coins{font-size:.88rem;font-weight:600;color:#606060;margin-bottom:12px;}
 .mbtn{
@@ -614,10 +614,9 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
 #theme-btn{
   position:absolute;top:18px;left:16px;
   width:46px;height:46px;border-radius:50%;
-  background:#272729;border:none;cursor:pointer;
-  font-size:1.4rem;line-height:46px;padding:0;text-align:center;
-  transition:background .2s,transform .15s,box-shadow .2s;
-  box-shadow:0 2px 12px rgba(0,0,0,.5);
+  background:none;border:none;cursor:pointer;
+  font-size:1.6rem;line-height:46px;padding:0;text-align:center;
+  transition:transform .15s;
   z-index:10;
 }
 #theme-btn:active{transform:scale(.88);}
@@ -831,8 +830,10 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   z-index:503;
   background:#1e1e22;
   border-radius:22px;
-  padding:10px 9px 12px;
-  width:58px;
+  padding:10px 12px 12px;
+  width:236px;
+  max-height:340px;
+  overflow-y:auto;
   box-shadow:0 12px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06);
   transition:transform 0.3s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
   pointer-events:none;
@@ -844,8 +845,9 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 }
 #theme-panel-title{display:none;}
 #theme-panel-row{
-  display:flex;flex-direction:column;
-  align-items:center;gap:6px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
 }
 .th-dot{
   width:40px;height:40px;border-radius:50%;cursor:pointer;
@@ -888,7 +890,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
   <button id="theme-btn" onclick="openThemePicker()">🎨</button>
   <button id="snd-btn" onclick="toggleSound()">🎵</button>
   <div id="menu-center">
-    <div class="m-logo" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
+    <div class="m-logo" onclick="adminTap()" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
       <svg viewBox="0 0 200 200" width="100" height="100" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;">
         <path d="M 22,22 L 178,22 L 178,100 A 78,78 0 0 1 22,100 Z"
               fill="none" stroke="#c0c0c0" stroke-width="17"
@@ -903,7 +905,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     </div>
     <div class="m-title">FinWor</div>
     <div class="m-sub">🧩 словесная головоломка</div>
-    <div class="m-coins">🪙 <span id="m-cval">0</span></div>
+    <div class="m-coins">🪙 <span id="m-cval">0</span> &nbsp;💎 <span id="m-crval">0</span></div>
     <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
     <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn mbtn-ad" onclick="showRewardedAd()">📺 +100 монет</button>
@@ -1043,13 +1045,13 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 
 <div id="toolbar">
   <button class="tbtn" id="t-hi" onclick="tHint()">
-    <span class="ti">💡</span><span class="tn">Подсказка</span><span class="tp">50 🪙</span>
+    <span class="ti">💡</span><span class="tn">Подсказка</span><span class="tp">150 🪙</span>
   </button>
   <button class="tbtn" id="t-fw" onclick="tFindWord()">
-    <span class="ti">✨</span><span class="tn">Найти слово</span><span class="tp">120 🪙</span>
+    <span class="ti">✨</span><span class="tn">Найти слово</span><span class="tp">250 🪙</span>
   </button>
   <button class="tbtn" id="t-sk" onclick="tSkip()">
-    <span class="ti">⏭</span><span class="tn">Пропуск</span><span class="tp">250 🪙</span>
+    <span class="ti">⏭</span><span class="tn">Пропуск</span><span class="tp">350 🪙</span>
   </button>
   <button class="tbtn-ad" id="btn-rewarded" onclick="showRewardedAd()">
     <span class="ti">📺</span><span class="tn">+100 монет</span>
@@ -1484,6 +1486,7 @@ function save(){
   localStorage.setItem('fw_a',arch);
   localStorage.setItem('fw_l',lvl);
   localStorage.setItem('fw_ml',maxLvl);
+  localStorage.setItem('fw_cr',crystals);
 }
 function saveProgress(){
   try{localStorage.setItem('fw_prog',JSON.stringify({l:lvl,f:found,u:[...used]}));}catch(e){}
@@ -1495,7 +1498,14 @@ function clearProgress(){
 let lvl    = si('fw_l',0);  if(lvl>=LEVELS.length)lvl=0;
 let coins  = si('fw_c',0);
 let arch   = si('fw_a',0);
-let maxLvl = si('fw_ml',lvl); // дальший разблокированный уровень
+let maxLvl = si('fw_ml',lvl);
+// Кристаллы: ретроактивно начислить за уже пройденные уровни при первом запуске v2
+if(!localStorage.getItem('fw_cr_v2')){
+  localStorage.removeItem('fw_unlocked_themes'); // сброс старых разблокировок за монеты/уровни
+  localStorage.setItem('fw_cr_v2','1');
+}
+let crystals = localStorage.getItem('fw_cr') !== null ? si('fw_cr',0) : Math.floor(maxLvl/20)*5;
+if(localStorage.getItem('fw_cr')===null) localStorage.setItem('fw_cr',crystals);
 let archSet=new Set();
 
 let sel=[],used=new Set(),found=[],dragging=false,lastCell=-1,checking=false;
@@ -1503,56 +1513,172 @@ let sel=[],used=new Set(),found=[],dragging=false,lastCell=-1,checking=false;
 // БОНУСНЫЕ УРОВНИ
 // ══════════════════════════════════════
 const BONUS_LEVELS = [
-  // ── Фаза 0: Зерно (5×5 = 25 кл., слова 3–5 букв) ──
-  { phase:0, rows:5, cols:5, words:[],
-    grid:["Р","О","Г","А","Т","У","С","К","О","Р","Б","Е","Л","К","А","О","С","А","Р","Е","Б","А","Н","К","А"] },
-  // РОГ[0-2], БЕЛКА[10-14], ОСА[15-17], БАНКА[20-24], КОРА[7,8,9,14]
-  { phase:0, rows:5, cols:5, words:[],
-    grid:["С","О","Л","Н","Ь","Т","Р","А","В","А","О","Г","О","Н","Ь","В","О","Л","К","А","К","О","С","Т","Ь"] },
-  // ТРАВА[5-9], ОГОНЬ[10-14], ВОЛКА[15-19], КОСТЬ[20-24]
-  { phase:0, rows:5, cols:5, words:[],
-    grid:["Л","У","Г","О","В","О","С","Е","Н","Ь","К","А","Р","Т","А","Б","Е","Р","Е","Г","Д","О","М","К","И"] },
-  // ЛУГ[0-2], ОСЕНЬ[5-9], КАРТА[10-14], БЕРЕГ[15-19], ДОМ[20-22]
-  { phase:0, rows:5, cols:5, words:[],
-    grid:["Ч","А","Й","К","А","У","Т","Р","О","Б","Е","З","А","С","А","Д","О","М","Ы","К","С","Н","Е","Г","А"] },
-  // ЧАЙКА[0-4], УТРО[5-8], ОСА[10,?], СНЕГ[20-23], ДОМ[15-17]
-  { phase:0, rows:5, cols:5, words:[],
-    grid:["В","О","Р","О","Н","А","К","У","Л","А","С","Т","А","Р","К","О","С","А","Д","К","К","О","Т","И","К"] },
-  // ВОРОН[0-4], СТАРТ?, ОСА[15-17], КОТИК[20-24]
+  // ── Фаза 0: Бактерия (3×3 = 9 кл., 3 слова × 3 буквы) ── L-образные и зигзаг маршруты
+  // W1:[0,1,4]→↓  W2:[2,5,8]↓↓  W3:[3,6,7]↓→
+  { phase:0, rows:3, cols:3,
+    words:["ДУБ","ЛАК","ТАЗ"],
+    grid:["Д","У","Л","Т","Б","А","А","З","К"] },
+  // W1:[0,3,4]↓→  W2:[1,2,5]→↓  W3:[8,7,6]←←
+  { phase:0, rows:3, cols:3,
+    words:["БОР","ЖОМ","ЗУД"],
+    grid:["Б","Ж","О","О","Р","М","Д","У","З"] },
+  // W1:[6,3,4]↑→  W2:[7,8,5]→↑  W3:[0,1,2]→→
+  { phase:0, rows:3, cols:3,
+    words:["ЛЮК","ВАЛ","ЙОД"],
+    grid:["Й","О","Д","Ю","К","Л","Л","В","А"] },
+  // W1:[2,1,4]←↓  W2:[0,3,6]↓↓  W3:[7,8,5]→↑
+  { phase:0, rows:3, cols:3,
+    words:["ЗАЛ","ВОЙ","ЧАН"],
+    grid:["В","А","З","О","Л","Н","Й","Ч","А"] },
+  // W1:[8,5,4]↑←  W2:[0,1,2]→→  W3:[3,6,7]↓→
+  { phase:0, rows:3, cols:3,
+    words:["ЖАЛ","ГАЗ","ВОЙ"],
+    grid:["Г","А","З","В","Л","А","О","Й","Ж"] },
 
-  // ── Фаза 1: Росток (6×5 = 30 кл., слова 5–6 букв) ──
-  { phase:1, rows:6, cols:5, words:[],
-    grid:["К","А","Р","Т","А","О","Б","Л","А","К","С","К","А","Л","А","Т","О","Г","О","Р","А","Д","Р","О","В","В","Е","С","Н","А"] },
-  // КАРТА[0-4], СКАЛА[10-14], ВЕСНА[25-29]
-  { phase:1, rows:6, cols:5, words:[],
-    grid:["С","Е","Р","Д","Е","К","Р","Ы","Ш","А","Л","У","Г","О","В","О","С","Е","Н","Ь","К","О","Н","Е","Ц","Т","Р","А","В","А"] },
-  // КРЫША[5-9], ЛУГ[10-12], ОСЕНЬ[15-19], КОНЕЦ[20-24], ТРАВА[25-29]
-  { phase:1, rows:6, cols:5, words:[],
-    grid:["З","А","К","О","Н","О","Б","Р","А","З","С","Е","М","Ь","Я","Д","Р","У","Г","А","К","Н","И","Г","А","М","О","Р","Я","К"] },
-  // ЗАКОН[0-4], ОБРАЗ[5-9], СЕМЬЯ[10-14], ДРУГА[15-19], КНИГА[20-24], МОРЯК[25-29]
-  { phase:1, rows:6, cols:5, words:[],
-    grid:["В","О","Д","А","С","Т","А","Н","Е","Ц","О","Г","О","Н","Ь","С","О","Н","Е","Т","Г","О","Р","О","Д","П","Е","С","Н","Я"] },
-  // ВОДА[0-3], ТАНЕЦ[5-9], ОГОНЬ[10-14], СОНЕТ[15-19], ГОРОД[20-24], ПЕСНЯ[25-29]
-  { phase:1, rows:6, cols:5, words:[],
-    grid:["Б","Е","Р","Е","Г","О","К","Е","А","Н","С","Т","Р","А","Х","Р","Е","К","А","Я","С","В","Е","Т","А","Р","О","Б","О","Т"] },
-  // БЕРЕГ[0-4], ОКЕАН[5-9], СТРАХ[10-14], РЕКАЯ?, СВЕТ[20-23], РОБОТ[25-29]
+  // ── Фаза 1: Червь (4×3 = 12 кл., 3 слова × 4 буквы) ── зигзаги и U-повороты
+  // W1:[1,0,3,6]←↓↓  W2:[2,5,4,7]↓←↓  W3:[8,11,10,9]↓←←
+  { phase:1, rows:4, cols:3,
+    words:["ГРИБ","КРАБ","ГЛАЗ"],
+    grid:["Р","Г","К","И","А","Р","Б","Б","Г","З","А","Л"] },
+  // W1:[0,3,4,1]↓→↑  W2:[2,5,8,7]↓↓←  W3:[6,9,10,11]↓→→
+  { phase:1, rows:4, cols:3,
+    words:["ЗУБР","ГОРБ","ЖБАН"],
+    grid:["З","Р","Г","У","Б","О","Ж","Б","Р","Б","А","Н"] },
+  // W1:[0,1,4,3]→↓←  W2:[2,5,8,7]↓↓←  W3:[6,9,10,11]↓→→
+  { phase:1, rows:4, cols:3,
+    words:["МГЛА","КРАХ","ДОЛГ"],
+    grid:["М","Г","К","А","Л","Р","Д","Х","А","О","Л","Г"] },
+  // W1:[1,0,3,6]←↓↓  W2:[2,5,4,7]↓←↓  W3:[8,11,10,9]↓←←
+  { phase:1, rows:4, cols:3,
+    words:["БРИГ","ПЛОТ","ТРОС"],
+    grid:["Р","Б","П","И","О","Л","Г","Т","Т","С","О","Р"] },
+  // W1:[0,1,4,3]→↓←  W2:[2,5,8,7]↓↓←  W3:[6,9,10,11]↓→→
+  { phase:1, rows:4, cols:3,
+    words:["СЕРП","ХЛАМ","КРОВ"],
+    grid:["С","Е","Х","П","Р","Л","К","М","А","Р","О","В"] },
 
-  // ── Фаза 2: Дерево (6×6 = 36 кл., слова 7–8 букв) ──
-  { phase:2, rows:6, cols:6, words:[],
-    grid:["К","Р","А","С","О","Т","А","Б","Р","И","К","А","Г","О","Р","О","Д","А","З","А","К","А","Т","Ы","С","В","О","Б","О","Д","М","О","Р","О","З","Ы"] },
-  // ГОРОДА[12-17], ЗАКАТЫ[18-23], СВОБОД[24-29], МОРОЗЫ[30-35]
-  { phase:2, rows:6, cols:6, words:[],
-    grid:["С","Т","О","Л","И","Ц","А","К","А","Р","Т","А","Б","Е","С","Е","Д","А","К","Р","А","С","К","А","М","О","Л","О","К","О","Р","А","К","Е","Т","А"] },
-  // СТОЛИЦ[0-5], КАРТА[6,7?]... БЕСЕДА[12-17], КРАСКА[18-23], МОЛОКО[24-29], РАКЕТА[30-35]
-  { phase:2, rows:6, cols:6, words:[],
-    grid:["Ж","У","Р","А","В","Л","Ь","О","К","Т","Я","Б","Р","У","Б","А","Ш","К","А","К","В","А","Р","Е","Л","Ь","П","О","С","Ы","Л","К","А","Б","О","Ц"] },
-  // ЖУРАВЛЬ[0-6], ОКТЯБР[?], РУБАШКА[12-18?], АКВАРЕЛ[?], ПОСЫЛКА[26-32]
-  { phase:2, rows:6, cols:6, words:[],
-    grid:["К","Р","О","В","А","Т","Ь","А","Ш","К","А","Б","Е","С","Е","Д","К","А","М","О","Л","Ч","А","Н","И","Е","П","Е","Р","Ч","А","Т","К","А","Б","Ц"] },
-  // КРОВАТЬ[0-6], БЕСЕДКА[12-18?], МОЛЧАНИЕ[?], ПЕРЧАТКА[26-33?]
-  { phase:2, rows:6, cols:6, words:[],
-    grid:["О","К","Т","Я","Б","Р","Ь","Ш","К","А","Т","У","Л","К","А","С","Е","М","А","Ф","О","Р","К","А","Р","Т","И","Н","А","С","Т","О","Л","И","Ц","А"] },
-  // ОКТЯБРЬ[0-6], ШКАТУЛКА[7-14], СЕМАФОР[15-21], КАРТИНА[22-28], СТОЛИЦА[29-35]
+  // ── Фаза 2: Рыба (5×5 = 25 кл., 5 слов × 5 букв) ── шаблон TA, сложные слова
+  // W1:[0-4] W2:[9,8,7,6,5] W3:[10,15,20,21,16] W4:[11,12,13,14,19] W5:[24,23,22,17,18]
+  { phase:2, rows:5, cols:5,
+    words:["ВЗРЫВ","ЯКОРЬ","БУРАН","КЛОУН","КУПОЛ"],
+    grid:["В","З","Р","Ы","В","Ь","Р","О","К","Я","Б","К","Л","О","У","У","Н","О","Л","Н","Р","А","П","У","К"] },
+  { phase:2, rows:5, cols:5,
+    words:["РЕБУС","ВАХТА","ЭПОХА","ДИВАН","СУДАК"],
+    grid:["Р","Е","Б","У","С","А","Т","Х","А","В","Э","Д","И","В","А","П","А","А","К","Н","О","Х","Д","У","С"] },
+  { phase:2, rows:5, cols:5,
+    words:["ПОЭМА","КАЗАК","БОКАЛ","КОВЁР","КВАНТ"],
+    grid:["П","О","Э","М","А","К","А","З","А","К","Б","К","О","В","Ё","О","Л","Н","Т","Р","К","А","А","В","К"] },
+  { phase:2, rows:5, cols:5,
+    words:["АОРТА","СУКНО","ПИРОГ","ВИРАЖ","КУПОН"],
+    grid:["А","О","Р","Т","А","О","Н","К","У","С","П","В","И","Р","А","И","Г","О","Н","Ж","Р","О","П","У","К"] },
+  { phase:2, rows:5, cols:5,
+    words:["КАБАН","РЕЛЬС","ЗЕФИР","ТЕСАК","ЧАЛМА"],
+    grid:["К","А","Б","А","Н","С","Ь","Л","Е","Р","З","Т","Е","С","А","Е","Р","М","А","К","Ф","И","Л","А","Ч"] },
+
+  // ── Фаза 3: Ящерица (5×6 = 30 кл., 5 слов × 6 букв) ── шаблоны TC и TCC, сложные слова
+  // Шаблон TC: W1:[0,6,12,18,24,25] W2:[5,4,3,2,1,7] W3:[8,9,10,11,17,16] W4:[13,14,15,21,20,19] W5:[26,27,28,29,23,22]
+  { phase:3, rows:5, cols:6,
+    words:["ТЕЛЕГА","КОЛЬЦО","ФАСОЛЬ","БУЛЬОН","ПРЯЛКА"],
+    grid:["Т","Ц","Ь","Л","О","К","Е","О","Ф","А","С","О","Л","Б","У","Л","Ь","Л","Е","Н","О","Ь","А","К","Г","А","П","Р","Я","Л"] },
+  // Шаблон TCC: W1:[0,6,12,13,14,15] W2:[5,4,3,2,1,7] W3:[8,9,10,11,17,16] W4:[22,23,29,28,27,21] W5:[18,19,20,26,25,24]
+  { phase:3, rows:5, cols:6,
+    words:["КАСКАД","ФОРЕЛЬ","ТРОПИК","ГАРПУН","ФОНАРЬ"],
+    grid:["К","Л","Е","Р","О","Ф","А","Ь","Т","Р","О","П","С","К","А","Д","К","И","Ф","О","Н","Н","Г","А","Ь","Р","А","У","П","Р"] },
+  // Шаблон TC
+  { phase:3, rows:5, cols:6,
+    words:["КРЕСЛО","КАБЕЛЬ","ЗАНОЗА","ФАРТУК","КЛЯТВА"],
+    grid:["К","Л","Е","Б","А","К","Р","Ь","З","А","Н","О","Е","Ф","А","Р","А","З","С","К","У","Т","А","В","Л","О","К","Л","Я","Т"] },
+  // Шаблон TC
+  { phase:3, rows:5, cols:6,
+    words:["ЛОПАТА","ЖАЛОБА","НАКИПЬ","ЗАТВОР","ПОМАДА"],
+    grid:["Л","Б","О","Л","А","Ж","О","А","Н","А","К","И","П","З","А","Т","Ь","П","А","Р","О","В","А","Д","Т","А","П","О","М","А"] },
+  // Шаблон TCC
+  { phase:3, rows:5, cols:6,
+    words:["РУБАХА","МАТРОС","МОНАРХ","КЛИПЕР","БАЛЛОН"],
+    grid:["Р","О","Р","Т","А","М","У","С","М","О","Н","А","Б","А","Х","А","Х","Р","Б","А","Л","Р","К","Л","Н","О","Л","Е","П","И"] },
+
+  // ── Дополнительный пул Фаза 0 (3×3) ──
+  // W1:[0,1,4]→↓  W2:[2,5,8]↓↓  W3:[3,6,7]↓→
+  { phase:0, rows:3, cols:3,
+    words:["КУМ","ЗУД","БОР"],
+    grid:["К","У","З","Б","М","У","О","Р","Д"] },
+  // W1:[0,3,4]↓→  W2:[1,2,5]→↓  W3:[8,7,6]←←
+  { phase:0, rows:3, cols:3,
+    words:["ВАЛ","ЙОД","ЛЮК"],
+    grid:["В","Й","О","А","Л","Д","К","Ю","Л"] },
+  // W1:[6,3,4]↑→  W2:[7,8,5]→↑  W3:[0,1,2]→→
+  { phase:0, rows:3, cols:3,
+    words:["ЧАН","КУМ","ЛАЗ"],
+    grid:["Л","А","З","А","Н","М","Ч","К","У"] },
+  // W1:[2,1,4]←↓  W2:[0,3,6]↓↓  W3:[7,8,5]→↑
+  { phase:0, rows:3, cols:3,
+    words:["ЛАК","ДУБ","ЗОВ"],
+    grid:["Д","А","Л","У","К","В","Б","З","О"] },
+  // W1:[8,5,4]↑←  W2:[0,1,2]→→  W3:[3,6,7]↓→
+  { phase:0, rows:3, cols:3,
+    words:["БОР","ЖОМ","ЛЮК"],
+    grid:["Ж","О","М","Л","Р","О","Ю","К","Б"] },
+
+  // ── Дополнительный пул Фаза 1 (4×3) ──
+  // W1:[0,1,4,7]→↓↓  W2:[2,5,8,11]↓↓↓  W3:[3,6,9,10]↓↓→
+  { phase:1, rows:4, cols:3,
+    words:["КЛОП","ГРУЗ","ЖЕСТ"],
+    grid:["К","Л","Г","Ж","О","Р","Е","П","У","С","Т","З"] },
+  // W1:[2,1,0,3]←←↓  W2:[5,4,7,6]←↓←  W3:[9,10,11,8]→→↑
+  { phase:1, rows:4, cols:3,
+    words:["ТРЮМ","КЛЯП","ГНЕВ"],
+    grid:["Ю","Р","Т","М","Л","К","П","Я","В","Г","Н","Е"] },
+  // W1:[0,1,2,5]→→↓  W2:[11,8,7,4]↑←↑  W3:[3,6,9,10]↓↓→
+  { phase:1, rows:4, cols:3,
+    words:["ШРАМ","ЗНОЙ","УКОР"],
+    grid:["Ш","Р","А","У","Й","М","К","О","Н","О","Р","З"] },
+  // W1:[3,4,1,0]→↑←  W2:[2,5,8,7]↓↓←  W3:[6,9,10,11]↓→→
+  { phase:1, rows:4, cols:3,
+    words:["ВИЗГ","БРЕД","КЛЮВ"],
+    grid:["Г","З","Б","В","И","Р","К","Д","Е","Л","Ю","В"] },
+  // W1:[9,10,7,4]→↑↑  W2:[11,8,5,2]↑↑↑  W3:[1,0,3,6]←↓↓
+  { phase:1, rows:4, cols:3,
+    words:["ДРОТ","ЖГУТ","ТЯГА"],
+    grid:["Я","Т","Т","Г","Т","У","А","О","Г","Д","Р","Ж"] },
+
+  // ── Дополнительный пул Фаза 2 (5×5, шаблон TA) ──
+  { phase:2, rows:5, cols:5,
+    words:["ФАКЕЛ","ВЕПРЬ","НАБАТ","СПРУТ","ХУРМА"],
+    grid:["Ф","А","К","Е","Л","Ь","Р","П","Е","В","Н","С","П","Р","У","А","Т","М","А","Т","Б","А","Р","У","Х"] },
+  { phase:2, rows:5, cols:5,
+    words:["ШЕЛЬФ","УКРОП","ТУЛУП","ЗАКАТ","НЕРПА"],
+    grid:["Ш","Е","Л","Ь","Ф","П","О","Р","К","У","Т","З","А","К","А","У","П","П","А","Т","Л","У","Р","Е","Н"] },
+  { phase:2, rows:5, cols:5,
+    words:["ТРЕЛЬ","ХОМУТ","КЛЕСТ","ДЕБЮТ","ШАЛАШ"],
+    grid:["Т","Р","Е","Л","Ь","Т","У","М","О","Х","К","Д","Е","Б","Ю","Л","Т","А","Ш","Т","Е","С","Л","А","Ш"] },
+  { phase:2, rows:5, cols:5,
+    words:["ЛЮТИК","ЖУПЕЛ","ЗАМША","ТАПИР","ЗУБЕЦ"],
+    grid:["Л","Ю","Т","И","К","Л","Е","П","У","Ж","З","Т","А","П","И","А","А","Е","Ц","Р","М","Ш","Б","У","З"] },
+  { phase:2, rows:5, cols:5,
+    words:["ДРОФА","САЗАН","ХОРЕЙ","ДЕКОР","МОТИВ"],
+    grid:["Д","Р","О","Ф","А","Н","А","З","А","С","Х","Д","Е","К","О","О","Й","И","В","Р","Р","Е","Т","О","М"] },
+
+  // ── Дополнительный пул Фаза 3 (5×6) ──
+  // Шаблон TC
+  { phase:3, rows:5, cols:6,
+    words:["ЖАРГОН","ШТОПОР","ЛИВЕНЬ","КИНЖАЛ","ЧЕРДАК"],
+    grid:["Ж","О","П","О","Т","Ш","А","Р","Л","И","В","Е","Р","К","И","Н","Ь","Н","Г","Л","А","Ж","К","А","О","Н","Ч","Е","Р","Д"] },
+  // Шаблон TCC
+  { phase:3, rows:5, cols:6,
+    words:["ТРОФЕЙ","НАЖДАК","ЖИЛИЩЕ","КОВЧЕГ","ФАНЕРА"],
+    grid:["Т","А","Д","Ж","А","Н","Р","К","Ж","И","Л","И","О","Ф","Е","Й","Е","Щ","Ф","А","Н","Г","К","О","А","Р","Е","Е","Ч","В"] },
+  // Шаблон TC
+  { phase:3, rows:5, cols:6,
+    words:["ФРЕГАТ","САПФИР","ЖЁЛУДЬ","ВОЛЧОК","РАПИРА"],
+    grid:["Ф","И","Ф","П","А","С","Р","Р","Ж","Ё","Л","У","Е","В","О","Л","Ь","Д","Г","К","О","Ч","А","Р","А","Т","Р","А","П","И"] },
+  // Шаблон TCC
+  { phase:3, rows:5, cols:6,
+    words:["ВАТМАН","ЛИСИЦА","ПАРНИК","КРАЮХА","НАРЦИС"],
+    grid:["В","Ц","И","С","И","Л","А","А","П","А","Р","Н","Т","М","А","Н","К","И","Н","А","Р","А","К","Р","С","И","Ц","Х","Ю","А"] },
+  // Шаблон TC
+  { phase:3, rows:5, cols:6,
+    words:["КОБУРА","ТАЙФУН","ТЮЛЕНЬ","ГРАНАТ","СИЛУЭТ"],
+    grid:["К","У","Ф","Й","А","Т","О","Н","Т","Ю","Л","Е","Б","Г","Р","А","Ь","Н","У","Т","А","Н","Т","Э","Р","А","С","И","Л","У"] },
 ];
 
 // ── Состояние бонуса ──
@@ -1633,16 +1759,19 @@ function bestPath(word,drawnPath){
 // ══════════════════════════════════════
 function addCoins(n,x,y){coins+=n;document.getElementById('cval').textContent=coins;save();updateBtns();if(x!==undefined)floatCoin(`+${n}🪙`,x,y);sndCoin();}
 function spend(n){
-  if(coins<n){
-    const el=document.getElementById('coins-row');
-    if(el){el.style.animation='none';el.offsetHeight;el.style.animation='hpulse .4s ease 2';}
-    if(navigator.vibrate)navigator.vibrate([30,20,30]);
-    return false;
-  }
+  if(_admInfCoins){coins=999999;document.getElementById('cval').textContent=coins;return true;}
+  if(coins<n){if(navigator.vibrate)navigator.vibrate([30,20,30]);return false;}
   coins-=n;document.getElementById('cval').textContent=coins;save();updateBtns();return true;
 }
+function addCrystals(n,x,y){
+  crystals+=n;
+  const el=document.getElementById('m-crval');
+  if(el)el.textContent=crystals;
+  save();
+  if(x!==undefined)floatCoin(`+${n}💎`,x,y);
+}
 function floatCoin(txt,x,y){const d=document.createElement('div');d.className='cf';d.textContent=txt;d.style.left=(x-20)+'px';d.style.top=(y-10)+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),1150);}
-function updateBtns(){[['t-hi',50],['t-fw',120],['t-sk',250]].forEach(([id,c])=>{document.getElementById(id).disabled=coins<c;});}
+function updateBtns(){[['t-hi',150],['t-fw',250],['t-sk',350]].forEach(([id,c])=>{document.getElementById(id).disabled=coins<c;});}
 
 // ══════════════════════════════════════
 // Архив
@@ -1706,7 +1835,15 @@ function loadLevel(){
 // ══════════════════════════════════════
 // Сетка
 // ══════════════════════════════════════
-function cellPx(){const L=CL(),maxW=Math.min(window.innerWidth-40,420);return Math.max(40,Math.min(Math.floor((maxW-(L.cols-1)*8)/L.cols),82));}
+function cellPx(){
+  const L=CL(),gap=8;
+  const maxW=Math.min(window.innerWidth-40,420);
+  const byW=Math.floor((maxW-(L.cols-1)*gap)/L.cols);
+  // header ~56px, dots ~28px, wdisplay ~40px, toolbar ~90px, banner ~60px, отступы ~24px = 298px
+  const usableH=window.innerHeight-330;
+  const byH=Math.floor((usableH-(L.rows-1)*gap)/L.rows);
+  return Math.max(32,Math.min(byW,byH,82));
+}
 function buildGrid(){
   const L=CL(),cs=cellPx(),gap=8,W=L.cols*cs+(L.cols-1)*gap,H=L.rows*cs+(L.rows-1)*gap;
   const gw=document.getElementById('gw'),svg=document.getElementById('svg'),gel=document.getElementById('grid');
@@ -1822,10 +1959,10 @@ function finishBonus(){
   if(bonusTmr){clearInterval(bonusTmr);bonusTmr=null;}
   document.getElementById('bonus-timer-wrap').style.display='none';
   document.getElementById('bonus-secs').classList.remove('urgent');
-  const n = bonusFound.size, c = n*5;
-  addCoins(c);
-  document.getElementById('bonus-found-lbl').textContent = 'Найдено слов: '+n;
-  document.getElementById('bonus-coins-lbl').textContent = '+'+c+' 🪙';
+  const n=found.length, total=CL()?CL().words.length:0;
+  const allDone=n===total&&total>0;
+  document.getElementById('bonus-found-lbl').textContent=allDone?'🎉 Все слова найдены!':'Найдено: '+n+' из '+total;
+  document.getElementById('bonus-coins-lbl').textContent=n>0?'+'+n*5+' 🪙 уже начислено':'';
   document.getElementById('bonus-end').classList.add('on');
 }
 function continueAfterBonus(){
@@ -1841,27 +1978,6 @@ function submit(){
   const w=cw();
   if(w.length===0){clearSel();return;}
   if(w.length===1){wrongFx();clearSel();return;}
-  // ── Бонусный режим ──────────────────────────────────
-  if(bonusMode){
-    if(w.length>=3 && VOCAB.has(w) && !bonusFound.has(w)){
-      bonusFound.add(w);
-      // Подсветить найденные клетки зелёным на 750мс
-      const foundCells=[...sel];
-      foundCells.forEach(idx=>{
-        const el=document.querySelector(`.cell[data-idx="${idx}"]`);
-        if(el){el.classList.add('bonus-ok');setTimeout(()=>el.classList.remove('bonus-ok'),800);}
-      });
-      const gc=document.getElementById('cval').getBoundingClientRect();
-      addCoins(5,gc.left+gc.width/2,gc.top);
-      sndCorrect();
-      setWord('+5 🪙  '+w,'');
-      setTimeout(()=>setWord(''),900);
-    } else if(bonusFound.has(w)){
-      setWord('Уже находил','warn');
-      setTimeout(()=>setWord(''),1200);
-    } else { wrongFx(); }
-    clearSel(); return;
-  }
   const lw=matchLevel(w);
   if(lw){
     const path=[...sel];
@@ -1883,6 +1999,14 @@ function accept(word,cells){
   saveProgress();
   if(navigator.vibrate)navigator.vibrate([35]);
   sndCorrect();refreshDots();clearSel();
+  if(bonusMode){
+    cells.forEach(i=>{
+      const el=document.querySelector(`.cell[data-idx="${i}"]`);
+      if(el){el.style.setProperty('background','#2ecc71','important');el.style.setProperty('color','#fff','important');}
+    });
+    const gc=document.getElementById('cval').getBoundingClientRect();
+    addCoins(5,gc.left+gc.width/2,gc.top);
+  }
   if(found.length===CL().words.length)setTimeout(complete,400);
 }
 
@@ -1916,33 +2040,41 @@ function wrongFx(){
 // Инструменты
 // ══════════════════════════════════════
 function tHint(){
-  if(!spend(50))return;
-  if(navigator.vibrate)navigator.vibrate([20]);
-  const rem=CL().words.filter(w=>!found.includes(w));
-  if(!rem.length)return;
-  const path=findPath(rem[Math.floor(Math.random()*rem.length)]);
-  if(!path)return;
-  const c=document.querySelector(`.cell[data-idx="${path[0]}"]`);
-  if(c){c.classList.add('hint-pulse');c.addEventListener('animationend',()=>c.classList.remove('hint-pulse'),{once:true});}
-}
-function tFindWord(){
-  if(!spend(120))return;
+  if(!spend(150))return;
   if(navigator.vibrate)navigator.vibrate([20]);
   const rem=CL().words.filter(w=>!found.includes(w));
   if(!rem.length)return;
   const word=rem[Math.floor(Math.random()*rem.length)];
   const path=findPath(word);
-  if(!path){addCoins(120);return;}
+  if(!path){addCoins(150);return;}
+  // Подсветить первую клетку слова
+  const c=document.querySelector(`.cell[data-idx="${path[0]}"]`);
+  if(c){
+    const ht=THEMES.find(x=>x.id===curThemeId)||THEMES[0];
+    c.classList.remove('hint-pulse');
+    void c.offsetWidth;
+    c.classList.add('hint-pulse');
+    c.addEventListener('animationend',()=>c.classList.remove('hint-pulse'),{once:true});
+  }
+}
+function tFindWord(){
+  if(!spend(250))return;
+  if(navigator.vibrate)navigator.vibrate([20]);
+  const rem=CL().words.filter(w=>!found.includes(w));
+  if(!rem.length)return;
+  const word=rem[Math.floor(Math.random()*rem.length)];
+  const path=findPath(word);
+  if(!path){addCoins(250);return;}
   path.forEach((idx,i)=>setTimeout(()=>document.querySelector(`.cell[data-idx="${idx}"]`)?.classList.add('sel'),i*70));
   setTimeout(()=>accept(word,path),path.length*70+200);
 }
-function tSkip(){if(!spend(250))return;if(navigator.vibrate)navigator.vibrate([20]);complete();}
+function tSkip(){if(!spend(350))return;if(navigator.vibrate)navigator.vibrate([20]);complete();}
 
 // ══════════════════════════════════════
 // Конец уровня
 // ══════════════════════════════════════
 function complete(){
-  if(bonusMode) return; // в бонусе complete не вызывается
+  if(bonusMode){ finishBonus(); return; }
   clearProgress();
   if(lvl+1>maxLvl)maxLvl=lvl+1;
   save();sndComplete();setTimeout(()=>launchConfetti(),300);
@@ -1960,10 +2092,15 @@ function nextLevel(){
   document.getElementById('overlay').classList.remove('on');
   _levelsAfterAd++;
   // Каждые 2 уровня — межуровневая реклама
-  if(_levelsAfterAd >= 2){
+  if(_levelsAfterAd >= (lvl <= 25 ? 3 : 2)){
     _levelsAfterAd = 0;
     showInterstitialAd();
     return;
+  }
+  // Каждые 20 пройденных уровней → кристаллы
+  if((wasLvl+1)%20===0){
+    const gc=document.getElementById('cval').getBoundingClientRect();
+    addCrystals(5,gc.left+gc.width/2,gc.top);
   }
   // Каждые 10 пройденных уровней → бонус
   if((wasLvl+1)%10===9){
@@ -1975,6 +2112,11 @@ function nextLevel(){
 
 function _afterInterstitial(){
   const wasLvl = lvl - 1;
+  // Каждые 20 пройденных уровней → кристаллы
+  if(wasLvl >= 0 && (wasLvl+1)%20===0){
+    const gc=document.getElementById('cval').getBoundingClientRect();
+    addCrystals(5,gc.left+gc.width/2,gc.top);
+  }
   if(wasLvl >= 0 && (wasLvl+1)%10===9){
     triggerBonus();
   } else {
@@ -1983,6 +2125,7 @@ function _afterInterstitial(){
 }
 
 function showInterstitialAd(){
+  if(!navigator.onLine){ _afterInterstitial(); return; }
   if(window.AndroidAds){
     window.onInterstitialClosed = function(){ _afterInterstitial(); };
     AndroidAds.showInterstitial();
@@ -1990,6 +2133,10 @@ function showInterstitialAd(){
     _afterInterstitial();
   }
 }
+
+window.addEventListener('online', function(){
+  // просто перезагрузить баннер при появлении интернета, не показывать интерстишиал внезапно
+});
 
 function showRewardedAd(){
   if(window.AndroidAds){
@@ -2171,13 +2318,21 @@ function updateSndBtn(){
 
 // ── Тема ────────────────────────────────
 const THEMES=[
-  {id:'dark',   unlock:0,   bg:'#1c1c1e',cell:'#272729',sel:'#c0c0c0',stx:'#1c1c1e',used:'#141416',txt:'#c0c0c0',accent:'#c8a028',confetti:['#c0c0c0','#a0a0a0','#e0e0e0','#808080','#d0d0d0']},
-  {id:'light',  unlock:0,   bg:'#c8c8c8',cell:'#b4b4b4',sel:'#1c1c1e',stx:'#c8c8c8',used:'#9a9a9a',txt:'#1c1c1e',accent:'#c8a028',confetti:['#1c1c1e','#3a3a3c','#505050','#2c2c2e','#404040']},
-  {id:'ocean',  unlock:50,  bg:'#0d1b2a',cell:'#1a3045',sel:'#4a9eff',stx:'#fff',   used:'#0a1520',txt:'#c0d8f0',accent:'#4a9eff',confetti:['#4a9eff','#00cfff','#0080ff','#a0d8ff','#ffffff']},
-  {id:'forest', unlock:80,  bg:'#0a1a0a',cell:'#1a3018',sel:'#50d060',stx:'#0a1a0a',used:'#081208',txt:'#a0d0a0',accent:'#50d060',confetti:['#50d060','#a0d0a0','#00a020','#80ff80','#c0ffc0']},
-  {id:'violet', unlock:120, bg:'#150d28',cell:'#251848',sel:'#9060f0',stx:'#fff',   used:'#0d0818',txt:'#c0a0f0',accent:'#9060f0',confetti:['#9060f0','#c0a0f0','#6030d0','#e0c0ff','#ffffff']},
-  {id:'crimson',unlock:160, bg:'#280808',cell:'#401010',sel:'#ff5050',stx:'#fff',   used:'#180404',txt:'#f0a0a0',accent:'#ff5050',confetti:['#ff5050','#f0a0a0','#cc0000','#ffaaaa','#ffffff']},
-  {id:'gold',   unlock:200, bg:'#1a1508',cell:'#2a2010',sel:'#f6b93b',stx:'#1a1508',used:'#100e04',txt:'#e0c880',accent:'#f6b93b',confetti:['#f6b93b','#e0c880','#d4a017','#ffe48a','#ffffff']},
+  {id:'dark',    unlock:0,  name:'Тёмная',   bg:'#1c1c1e',cell:'#272729',sel:'#c0c0c0',stx:'#1c1c1e',used:'#141416',txt:'#c0c0c0',accent:'#c8a028',confetti:['#c0c0c0','#a0a0a0','#e0e0e0','#808080','#d0d0d0']},
+  {id:'light',   unlock:0,  name:'Светлая',  bg:'#c8c8c8',cell:'#b4b4b4',sel:'#1c1c1e',stx:'#c8c8c8',used:'#9a9a9a',txt:'#1c1c1e',accent:'#c8a028',confetti:['#1c1c1e','#3a3a3c','#505050','#2c2c2e','#404040']},
+  {id:'ocean',   unlock:20, name:'Океан',    bg:'#0d1b2a',cell:'#1a3045',sel:'#4a9eff',stx:'#fff',   used:'#0a1520',txt:'#c0d8f0',accent:'#4a9eff',confetti:['#4a9eff','#00cfff','#0080ff','#a0d8ff','#ffffff']},
+  {id:'forest',  unlock:20, name:'Лес',      bg:'#0a1a0a',cell:'#1a3018',sel:'#50d060',stx:'#0a1a0a',used:'#081208',txt:'#a0d0a0',accent:'#50d060',confetti:['#50d060','#a0d0a0','#00a020','#80ff80','#c0ffc0']},
+  {id:'violet',  unlock:20, name:'Фиолет',   bg:'#150d28',cell:'#251848',sel:'#9060f0',stx:'#fff',   used:'#0d0818',txt:'#c0a0f0',accent:'#9060f0',confetti:['#9060f0','#c0a0f0','#6030d0','#e0c0ff','#ffffff']},
+  {id:'crimson', unlock:20, name:'Алый',     bg:'#280808',cell:'#401010',sel:'#ff5050',stx:'#fff',   used:'#180404',txt:'#f0a0a0',accent:'#ff5050',confetti:['#ff5050','#f0a0a0','#cc0000','#ffaaaa','#ffffff']},
+  {id:'gold',    unlock:20, name:'Золото',   bg:'#1a1508',cell:'#2a2010',sel:'#f6b93b',stx:'#1a1508',used:'#100e04',txt:'#e0c880',accent:'#f6b93b',confetti:['#f6b93b','#e0c880','#d4a017','#ffe48a','#ffffff']},
+  {id:'sunset',  unlock:20, name:'Закат',    bg:'#1a0d1a',cell:'#2e1530',sel:'#ff6b35',stx:'#fff',   used:'#110809',txt:'#f0b090',accent:'#ff6b35',confetti:['#ff6b35','#ff3d7f','#ffb347','#c0392b','#ffffff']},
+  {id:'ice',     unlock:20, name:'Лёд',      bg:'#0d1520',cell:'#182535',sel:'#a8deff',stx:'#0d1520',used:'#080f18',txt:'#c8e8ff',accent:'#a8deff',confetti:['#a8deff','#5bc8ff','#ffffff','#7090b0','#e0f4ff']},
+  {id:'neon',    unlock:20, name:'Неон',     bg:'#080808',cell:'#141414',sel:'#39ff14',stx:'#080808',used:'#040404',txt:'#a0f080',accent:'#39ff14',confetti:['#39ff14','#00ffcc','#ffffff','#80ff40','#00cc44']},
+  {id:'rose',    unlock:20, name:'Роза',     bg:'#1a0a12',cell:'#2e1422',sel:'#ff4d8f',stx:'#fff',   used:'#10060c',txt:'#f0a0c0',accent:'#ff4d8f',confetti:['#ff4d8f','#ff80b0','#ff1a6a','#ffffff','#c0306a']},
+  {id:'slate',   unlock:20, name:'Сланец',   bg:'#0e1218',cell:'#1c2530',sel:'#6ab0d8',stx:'#fff',   used:'#080c12',txt:'#a0c0d8',accent:'#6ab0d8',confetti:['#6ab0d8','#3a8abf','#90d0f0','#ffffff','#4a7090']},
+  {id:'mint',    unlock:20, name:'Мята',     bg:'#091510',cell:'#142818',sel:'#40e0a0',stx:'#091510',used:'#050d08',txt:'#90d4b0',accent:'#40e0a0',confetti:['#40e0a0','#20c080','#80ffc0','#ffffff','#309070']},
+  {id:'amber',   unlock:20, name:'Янтарь',   bg:'#180e04',cell:'#2a1a08',sel:'#e8922a',stx:'#180e04',used:'#0e0802',txt:'#d4a870',accent:'#e8922a',confetti:['#e8922a','#ffb347','#c06010','#ffffff','#804000']},
+  {id:'midnight',unlock:20, name:'Полночь',  bg:'#08091e',cell:'#12163a',sel:'#5060e8',stx:'#fff',   used:'#050614',txt:'#9090d8',accent:'#5060e8',confetti:['#5060e8','#7080ff','#3040c0','#a0a0ff','#ffffff']},
 ];
 function themeCSS(t){
   return[
@@ -2201,9 +2356,7 @@ function themeCSS(t){
     `body.th-${t.id} .m-logo text,body.th-${t.id} .stats-logo text,body.th-${t.id} #spl-logo text{fill:${t.txt}!important}`,
     `body.th-${t.id} .tut-cell{background:${t.cell}!important;color:${t.txt}!important}`,
     `body.th-${t.id} .tut-bar-fill,body.th-${t.id} .tut-btn{background:${t.sel}!important;color:${t.stx}!important}`,
-    `@keyframes hpulse{0%,100%{background:${t.cell};box-shadow:none;transform:scale(1)}50%{background:${t.sel};box-shadow:0 0 22px ${t.sel}cc,0 0 8px ${t.sel}88;transform:scale(1.18);color:${t.stx}}}`,
     `body.th-${t.id} #toolbar{background:linear-gradient(to top,${t.bg} 70%,transparent)!important}`,
-    `body.th-${t.id} #ad-banner{background:${t.bg}!important;border-top:1px solid ${t.cell}!important}`,
   ].join('\n');
 }
 let curThemeId=localStorage.getItem('fw_theme_id')||'dark';
@@ -2222,8 +2375,10 @@ function applyTheme(){
   document.documentElement.style.setProperty('--hint-glow', t.sel + '80');
   document.documentElement.style.setProperty('--hint-stx', t.stx);
   document.documentElement.style.setProperty('--cell-bg', t.cell);
-  const b=document.getElementById('theme-btn');
-  if(b){b.style.background=t.cell;b.style.boxShadow='0 2px 12px rgba(0,0,0,.5)';}
+  // Всегда инжектим hpulse с реальными цветами (CSS vars не работают в keyframes на Android)
+  let hpEl=document.getElementById('hp-kf');
+  if(!hpEl){hpEl=document.createElement('style');hpEl.id='hp-kf';document.head.appendChild(hpEl);}
+  hpEl.textContent=`@keyframes hpulse{0%{transform:scale(1);box-shadow:0 0 0 0 ${t.sel}}45%{transform:scale(1.2);box-shadow:0 0 0 5px ${t.sel},0 0 28px ${t.sel}bb}100%{transform:scale(1);box-shadow:0 0 0 0 transparent}}body .cell.hint-pulse{transition:none;}`;
   const tp=document.getElementById('theme-panel');
   if(tp){tp.style.background=t.bg;tp.style.boxShadow=`0 12px 48px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.07),0 0 24px ${t.sel}22`;}
   document.querySelectorAll('.th-dot').forEach(d=>d.classList.toggle('cur',d.dataset.th===curThemeId));
@@ -2236,8 +2391,10 @@ function openThemePicker(){
   const btn = document.getElementById('theme-btn');
   if(btn && panel){
     const r = btn.getBoundingClientRect();
+    const panelW = 236;
+    const maxLeft = window.innerWidth - panelW - 8;
     panel.style.top = (r.bottom + 8) + 'px';
-    panel.style.left = r.left + 'px';
+    panel.style.left = Math.min(r.left, maxLeft) + 'px';
     panel.style.right = 'auto';
   }
   panel.classList.add('open');
@@ -2258,9 +2415,7 @@ function selectTheme(id){
 function isThemeUnlocked(t){
   if(t.unlock===0)return true;
   const arr=JSON.parse(localStorage.getItem('fw_unlocked_themes')||'[]');
-  if(arr.includes(t.id))return true;
-  if(maxLvl>=t.unlock)return true;
-  return false;
+  return arr.includes(t.id);
 }
 function trySelectTheme(t){
   if(isThemeUnlocked(t)){selectTheme(t.id);return;}
@@ -2269,10 +2424,11 @@ function trySelectTheme(t){
 let pendingTheme=null;
 function showThemeBuyPopup(t){
   pendingTheme=t;
-  document.getElementById('theme-buy-desc').textContent=`Открой за 500 🪙 или достигни уровня ${t.unlock}`;
+  document.getElementById('theme-buy-desc').textContent=`Открыть тему «${t.name}»`;
   const btn=document.getElementById('theme-buy-btn');
-  btn.disabled=coins<500;
-  btn.style.opacity=coins<500?'0.4':'1';
+  btn.disabled=crystals<20;
+  btn.style.opacity=crystals<20?'0.4':'1';
+  btn.textContent=crystals>=20?'💎 20 — Открыть':'Нужно 💎 20';
   document.getElementById('theme-buy-popup').style.display='flex';
 }
 function closeThemeBuyPopup(){
@@ -2280,7 +2436,11 @@ function closeThemeBuyPopup(){
   pendingTheme=null;
 }
 function buyTheme(){
-  if(!pendingTheme||!spend(500))return;
+  if(!pendingTheme||crystals<20)return;
+  crystals-=20;
+  const el=document.getElementById('m-crval');
+  if(el)el.textContent=crystals;
+  save();
   const arr=JSON.parse(localStorage.getItem('fw_unlocked_themes')||'[]');
   if(!arr.includes(pendingTheme.id))arr.push(pendingTheme.id);
   localStorage.setItem('fw_unlocked_themes',JSON.stringify(arr));
@@ -2288,42 +2448,55 @@ function buyTheme(){
   selectTheme(pendingTheme.id);
 }
 function renderThemePicker(){
+  const panel=document.getElementById('theme-panel');
+  const th=THEMES.find(t=>t.id===curThemeId)||THEMES[0];
+  panel.style.background=th.bg==='#c8c8c8'?'#d0d0d0':th.bg;
+  panel.style.boxShadow=`0 12px 48px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.07),0 0 24px ${th.sel}22`;
+
+  // Баланс кристаллов вверху панели
+  let balEl=document.getElementById('theme-cr-bal');
+  if(!balEl){
+    balEl=document.createElement('div');
+    balEl.id='theme-cr-bal';
+    balEl.style.cssText='text-align:center;font-size:.8rem;color:#aaa;padding:8px 0 4px;';
+    panel.insertBefore(balEl,panel.firstChild);
+  }
+  balEl.textContent=`💎 ${crystals}`;
+
   const row=document.getElementById('theme-panel-row');
   row.innerHTML='';
-  const names={dark:'Тёмная',light:'Светлая',ocean:'Океан',forest:'Лес',violet:'Фиолет',crimson:'Алый',gold:'Золото'};
-  const th=THEMES.find(t=>t.id===curThemeId)||THEMES[0];
-  const panel=document.getElementById('theme-panel');
-  panel.style.background=th.bg==='#c8c8c8'?'#d0d0d0':th.bg;
-  panel.style.boxShadow=`0 12px 48px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.07), 0 0 24px ${th.sel}22`;
+  row.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:4px 2px 8px;';
+
   THEMES.forEach(t=>{
     const unlocked=isThemeUnlocked(t);
     const wrap=document.createElement('div');
-    wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;';
+    wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;';
     wrap.onclick=()=>trySelectTheme(t);
     const d=document.createElement('div');
     const isCur=curThemeId===t.id;
     d.className='th-dot'+(isCur?' cur':'');
     d.dataset.th=t.id;
-    // Диагональный градиент: основной цвет фона сверху, акцентный снизу
-    d.style.background=`linear-gradient(135deg, ${t.bg} 50%, ${t.sel} 50%)`;
+    d.style.background=`linear-gradient(135deg,${t.bg} 50%,${t.sel} 50%)`;
     d.style.position='relative';
-    if(isCur){
-      d.style.boxShadow=`0 0 0 3px ${t.sel}66, 0 6px 20px ${t.sel}44`;
-    }
+    if(isCur) d.style.boxShadow=`0 0 0 3px ${t.sel}66,0 6px 20px ${t.sel}44`;
     if(!unlocked){
-      d.style.opacity='0.35';
+      d.style.opacity='0.4';
       d.style.filter='saturate(0.3)';
       const lock=document.createElement('div');
-      lock.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;pointer-events:none;border-radius:50%;';
+      lock.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1rem;pointer-events:none;border-radius:50%;';
       lock.textContent='🔒';
       d.appendChild(lock);
     }
     const name=document.createElement('div');
     name.className='th-dot-name';
-    name.textContent=names[t.id]||t.id;
+    name.textContent=t.name||t.id;
     name.style.color=unlocked?'#888':'#444';
+    const price=document.createElement('div');
+    price.style.cssText='font-size:.65rem;color:'+(unlocked?'transparent':'#5bc8ff')+';';
+    price.textContent=unlocked?'':'💎 20';
     wrap.appendChild(d);
     wrap.appendChild(name);
+    wrap.appendChild(price);
     row.appendChild(wrap);
   });
 }
@@ -2397,6 +2570,7 @@ function showScr(id){
 function doMenu(){
   document.getElementById('overlay').classList.remove('on');
   document.getElementById('m-cval').textContent=coins;
+  document.getElementById('m-crval').textContent=crystals;
   updateSndBtn();
   showScr('smenu');
 }
@@ -2555,15 +2729,12 @@ function admCoins(){
   admRefresh();
 }
 
-// Перехватываем spend() чтобы при ∞ монетах не уменьшать
-const _origSpend=spend;
-function spend(n){
-  if(_admInfCoins){
-    coins=999999;
-    document.getElementById('cval').textContent=coins;
-    return true;
-  }
-  return _origSpend(n);
+
+function admCrystals(){
+  crystals=999;save();
+  const el=document.getElementById('m-crval');
+  if(el)el.textContent=crystals;
+  admRefresh();
 }
 
 function admUnlock(){
@@ -2633,7 +2804,7 @@ function admReset(){
   <div id="theme-buy-box" style="background:#272729;border-radius:22px;padding:28px 24px;width:290px;text-align:center;">
     <div id="theme-buy-title" style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Тема заблокирована</div>
     <div id="theme-buy-desc" style="font-size:0.85rem;color:#888;margin-bottom:20px;line-height:1.4;"></div>
-    <button id="theme-buy-btn" onclick="buyTheme()" style="width:100%;padding:13px;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;">Купить 500 🪙</button>
+    <button id="theme-buy-btn" onclick="buyTheme()" style="width:100%;padding:13px;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;">💎 20 — Открыть</button>
     <button onclick="closeThemeBuyPopup()" style="width:100%;padding:11px;border:none;border-radius:14px;background:transparent;color:#888;font-size:0.9rem;cursor:pointer;">Закрыть</button>
   </div>
 </div>
@@ -2650,6 +2821,7 @@ function admReset(){
 
   <div class="adm-row">
     <button class="adm-btn" onclick="admCoins()" id="adm-inf-btn">💰 ∞ Монеты</button>
+    <button class="adm-btn" onclick="admCrystals()">💎 ∞ Алмазы</button>
     <button class="adm-btn" onclick="admUnlock()">🔓 Все уровни</button>
     <button class="adm-btn" onclick="admBonus()">🎁 Бонус-уровень</button>
     <button class="adm-btn" onclick="admComplete()">⚡ Пройти уровень</button>
