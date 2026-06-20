@@ -338,6 +338,7 @@ body {
 }
 #vignette.on { opacity: 1; transition: opacity 0s; }
 #vignette.off { opacity: 0; transition: opacity .4s; }
+#vignette.red { background: radial-gradient(ellipse at center, transparent 15%, rgba(180,30,30,0.75) 100%); }
 .cf {
   position: fixed; font-size: .85rem; font-weight: 700; color: #f5f5f7;
   pointer-events: none; z-index: 200;
@@ -445,6 +446,16 @@ header {
   padding: 14px 48px; font-size: .95rem; font-weight: 600; font-family: inherit; cursor: pointer;
 }
 .bnext:active { opacity: .7; }
+#exch-popup{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;}
+#exch-popup.on{display:flex;animation:olIn .3s cubic-bezier(.34,1.56,.64,1) both;}
+#exch-box{background:#272729;border-radius:26px;padding:32px 24px 22px;width:300px;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.exch-ico{font-size:2.6rem;margin-bottom:14px;line-height:1;}
+.exch-ttl{font-size:1.1rem;font-weight:700;color:#c0c0c0;margin-bottom:6px;letter-spacing:-.3px;}
+.exch-sub{font-size:.82rem;color:#606060;margin-bottom:26px;line-height:1.55;font-weight:500;}
+.exch-sub b{color:#909090;font-weight:700;}
+.exch-yes{width:100%;padding:14px;border:none;border-radius:16px;background:#27ae60;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:inherit;letter-spacing:.2px;}
+.exch-no{width:100%;padding:13px;border:none;border-radius:16px;background:rgba(180,40,40,0.15);color:#c0504d;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;}
+.exch-yes:active,.exch-no:active{opacity:.6;}
 
 /* ══════════════════════════════════════
    ЭКРАНЫ: СПЛЭШ / МЕНЮ / ВЫБОР УРОВНЯ
@@ -462,8 +473,10 @@ header {
   position:fixed;inset:0;background:#1c1c1e;z-index:500;
   display:flex;flex-direction:column;align-items:center;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
   padding-bottom:64px;
 }
+.sovr::-webkit-scrollbar{display:none;}
 .sovr.hid{display:none;}
 .sovr:not(.hid){animation:scrIn .35s cubic-bezier(.34,1.56,.64,1) both;}
 
@@ -583,6 +596,11 @@ body.light .slvl-coins{color:#707070!important;}
 body.light .stat-card{background:#b4b4b4!important;}
 body.light .stat-val{color:#1c1c1e!important;}
 body.light .stat-lbl,body.light .sp-head{color:#707070!important;}
+body.light .m-exchange{color:#1c1c1e!important;border-color:#1c1c1e30!important;}
+body.light #exch-box{background:#b4b4b4!important;}
+body.light .exch-ttl{color:#1c1c1e!important;}
+body.light .exch-sub{color:#707070!important;}
+body.light .exch-sub b{color:#1c1c1e!important;}
 body.light .sp-track{background:#b4b4b4!important;}
 body.light .m-logo path,body.light .stats-logo path,body.light #spl-logo path{stroke:#1c1c1e!important;}
 body.light .m-logo text,body.light .stats-logo text,body.light #spl-logo text{fill:#1c1c1e!important;}
@@ -757,6 +775,13 @@ body.light .tut-bar-fill,body.light .tut-btn{background:#1c1c1e!important;color:
   font-size:.62rem;color:#505050;font-weight:500;
   text-transform:uppercase;letter-spacing:.6px;text-align:center;
 }
+.m-exchange{
+  font-size:.85rem;color:#c0c0c0;font-weight:600;
+  letter-spacing:.3px;cursor:pointer;padding:6px 0;
+  border-bottom:1px solid #404040;
+  transition:opacity .15s;
+}
+.m-exchange:active{opacity:.4;}
 .stats-prog-wrap{width:100%;}
 .sp-head{
   display:flex;justify-content:space-between;
@@ -909,6 +934,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
     <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn mbtn-ad" onclick="showRewardedAd()">📺 +100 монет</button>
+    <div class="m-exchange" onclick="exchangeCoins()">🪙 → 💎</div>
     <button class="mbtn-icon" onclick="sndBtnStats();doStats()">📊 Статистика</button>
   </div>
 </div>
@@ -1691,8 +1717,6 @@ const bonusUsedIdx = {}; // phase → Set of used indices
 
 const CL = () => bonusLevelData || LEVELS[lvl];
 const R=i=>Math.floor(i/CL().cols), C=i=>i%CL().cols;
-const rev=s=>[...s].reverse().join('');
-
 function adj4(a,b){const dr=Math.abs(R(a)-R(b)),dc=Math.abs(C(a)-C(b));return(dr===1&&dc===0)||(dr===0&&dc===1);}
 function nb4(i){const{rows,cols}=CL(),r=R(i),c=C(i),res=[];if(r>0)res.push((r-1)*cols+c);if(r<rows-1)res.push((r+1)*cols+c);if(c>0)res.push(r*cols+c-1);if(c<cols-1)res.push(r*cols+c+1);return res;}
 function cw(){return sel.map(i=>CL().grid[i]).join('');}
@@ -1762,6 +1786,26 @@ function spend(n){
   if(_admInfCoins){coins=999999;document.getElementById('cval').textContent=coins;return true;}
   if(coins<n){if(navigator.vibrate)navigator.vibrate([30,20,30]);return false;}
   coins-=n;document.getElementById('cval').textContent=coins;save();updateBtns();return true;
+}
+function exchangeCoins(){
+  document.getElementById('exch-popup').classList.add('on');
+}
+function closeExchPopup(){
+  document.getElementById('exch-popup').classList.remove('on');
+}
+function confirmExchange(){
+  closeExchPopup();
+  if(!spend(1000)){
+    if(navigator.vibrate)navigator.vibrate([30,20,30]);
+    const v=document.getElementById('vignette');
+    v.className='on red';
+    setTimeout(()=>{v.className='off red';setTimeout(()=>v.className='',400);},50);
+    return;
+  }
+  const el=document.querySelector('.m-exchange');
+  const r=el.getBoundingClientRect();
+  addCrystals(10,r.left+r.width/2,r.top);
+  sndCoin();
 }
 function addCrystals(n,x,y){
   crystals+=n;
@@ -2352,6 +2396,11 @@ function themeCSS(t){
     `body.th-${t.id} .slvl-hdr,body.th-${t.id} #admin-panel,body.th-${t.id} #theme-panel,body.th-${t.id} #bonus-intro,body.th-${t.id} #bonus-end{background:${t.bg}!important}`,
     `body.th-${t.id} .dot.on,body.th-${t.id} .sp-fill,body.th-${t.id} #arch-fill{background:${t.sel}!important}`,
     `body.th-${t.id} #wdisplay,body.th-${t.id} .logo,body.th-${t.id} .slvl-ttl,body.th-${t.id} .stat-val,body.th-${t.id} #ms b,body.th-${t.id} .m-title,body.th-${t.id} .ot{color:${t.txt}!important}`,
+    `body.th-${t.id} .m-exchange{color:${t.txt}!important;border-color:${t.txt}30!important}`,
+    `body.th-${t.id} #exch-box{background:${t.cell}!important}`,
+    `body.th-${t.id} .exch-ttl{color:${t.txt}!important}`,
+    `body.th-${t.id} .exch-sub{color:${t.txt}60!important}`,
+    `body.th-${t.id} .exch-sub b{color:${t.txt}!important}`,
     `body.th-${t.id} .m-logo path,body.th-${t.id} .stats-logo path,body.th-${t.id} #spl-logo path{stroke:${t.txt}!important}`,
     `body.th-${t.id} .m-logo text,body.th-${t.id} .stats-logo text,body.th-${t.id} #spl-logo text{fill:${t.txt}!important}`,
     `body.th-${t.id} .tut-cell{background:${t.cell}!important;color:${t.txt}!important}`,
@@ -2800,6 +2849,15 @@ function admReset(){
 }
 </script>
 <!-- ══ ПОПАП ПОКУПКИ ТЕМЫ ═══════════════════════════════════ -->
+<div id="exch-popup" onclick="if(event.target===this)closeExchPopup()">
+  <div id="exch-box">
+    <div class="exch-ico">💎</div>
+    <div class="exch-ttl">Обмен валюты</div>
+    <div class="exch-sub">Потратить <b>1000 🪙</b><br>и получить <b>10 💎</b>?</div>
+    <button class="exch-yes" onclick="confirmExchange()">Обменять</button>
+    <button class="exch-no" onclick="closeExchPopup()">Отмена</button>
+  </div>
+</div>
 <div id="theme-buy-popup" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
   <div id="theme-buy-box" style="background:#272729;border-radius:22px;padding:28px 24px;width:290px;text-align:center;">
     <div id="theme-buy-title" style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Тема заблокирована</div>
