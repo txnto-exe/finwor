@@ -1689,8 +1689,8 @@ function initStreak(){
   return streak;
 }
 function streakMsg(n){
-  if(n===1)  return 'Добро пожаловать! Начни свою серию 💪';
-  if(n<=3)   return 'Хорошее начало! Продолжай 🔥';
+  if(n===0)  return 'Заходи в игру каждый день — и твой огонь будет гореть всё ярче 🔥';
+  if(n<=3)   return 'Хорошее начало! Продолжай заходить каждый день 🔥';
   if(n<=7)   return 'Красавчик, что играешь каждый день!';
   if(n<=14)  return 'Настоящий чемпион — '+n+' дней подряд! 🏆';
   if(n<=30)  return 'Невероятно! '+n+' дней подряд! 🚀';
@@ -1701,8 +1701,10 @@ let _streakShown=false;
 function showStreakPopup(){
   if(_streakShown) return;
   _streakShown=true;
-  document.getElementById('streak-num').textContent=currentStreak;
-  document.getElementById('streak-msg').textContent=streakMsg(currentStreak);
+  const display = currentStreak===1 ? 0 : currentStreak;
+  document.getElementById('streak-num').textContent=display;
+  document.getElementById('streak-days').textContent=display===0?'твой стрик':'день подряд';
+  document.getElementById('streak-msg').textContent=streakMsg(display);
   document.getElementById('streak-popup').classList.add('on');
 }
 function closeStreakPopup(){
@@ -2310,10 +2312,10 @@ function nextLevel(){
   save();
   document.getElementById('overlay').classList.remove('on');
   _levelsAfterAd++;
-  // До 10 уровня межуровневая реклама не показывается
-  if(lvl > 10){
-    // Каждые 2 уровня — межуровневая реклама (каждые 3 до уровня 25)
-    if(_levelsAfterAd >= (lvl <= 25 ? 3 : 2)){
+  // Реклама зависит от maxLvl (постоянно, не сбрасывается)
+  if(maxLvl >= 10){
+    const freq = maxLvl < 25 ? 3 : 2;
+    if(_levelsAfterAd >= freq){
       _levelsAfterAd = 0;
       showInterstitialAd();
       return;
