@@ -446,6 +446,23 @@ header {
   padding: 14px 48px; font-size: .95rem; font-weight: 600; font-family: inherit; cursor: pointer;
 }
 .bnext:active { opacity: .7; }
+/* Streak popup */
+#streak-popup{display:none;position:fixed;inset:0;z-index:650;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;}
+#streak-popup.on{display:flex;animation:olIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+#streak-box{background:#272729;border-radius:28px;padding:38px 28px 26px;width:290px;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.streak-fire{font-size:4.2rem;line-height:1;animation:firePulse 1.3s ease-in-out infinite;}
+@keyframes firePulse{0%,100%{transform:scale(1) rotate(-4deg);}50%{transform:scale(1.18) rotate(4deg);}}
+.streak-num{font-size:3.4rem;font-weight:800;color:#ff6b35;letter-spacing:-2px;margin:10px 0 2px;}
+.streak-days{font-size:.72rem;color:#606060;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px;}
+.streak-msg{font-size:.88rem;color:#b0b0b0;font-weight:500;line-height:1.55;margin-bottom:24px;}
+.streak-ok{width:100%;padding:14px;border:none;border-radius:16px;background:#ff6b35;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.2px;}
+.streak-ok:active{opacity:.7;}
+/* Streak в меню */
+.m-streak{font-size:.82rem;font-weight:700;color:#ff6b35;letter-spacing:.2px;margin-top:-2px;}
+/* Light theme */
+body.light #streak-box{background:#b4b4b4!important;}
+body.light .streak-days{color:#808080!important;}
+body.light .streak-msg{color:#1c1c1e!important;}
 #exch-popup{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;}
 #exch-popup.on{display:flex;animation:olIn .3s cubic-bezier(.34,1.56,.64,1) both;}
 #exch-box{background:#272729;border-radius:26px;padding:32px 24px 22px;width:300px;text-align:center;display:flex;flex-direction:column;align-items:center;}
@@ -931,6 +948,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
     <div class="m-title">FinWor</div>
     <div class="m-sub">🧩 словесная головоломка</div>
     <div class="m-coins">🪙 <span id="m-cval">0</span> &nbsp;💎 <span id="m-crval">0</span></div>
+    <div class="m-streak">🔥 <span id="m-streak-val">1</span></div>
     <button class="mbtn mbtn-p" onclick="sndBtnPlay();doPlay()">🎮 Играть</button>
     <button class="mbtn mbtn-s" onclick="sndBtnLevels();doLevels()">🗺️ Выбор уровня</button>
     <button class="mbtn mbtn-ad" onclick="showRewardedAd()">📺 +100 монет</button>
@@ -1653,6 +1671,43 @@ if(!localStorage.getItem('fw_cr_v2')){
 let crystals = localStorage.getItem('fw_cr') !== null ? si('fw_cr',0) : Math.floor(maxLvl/20)*5;
 if(localStorage.getItem('fw_cr')===null) localStorage.setItem('fw_cr',crystals);
 let archSet=new Set();
+
+// ── Стрик ──────────────────────────────
+function initStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  const lastDay=localStorage.getItem('fw_streak_day');
+  let streak=parseInt(localStorage.getItem('fw_streak')||'0',10)||0;
+  if(!lastDay){
+    streak=1;
+  } else if(lastDay!==today){
+    const diff=Math.round((new Date(today)-new Date(lastDay))/(864e5));
+    streak = diff===1 ? streak+1 : 1;
+    localStorage.setItem('fw_streak_day',today);
+  }
+  if(!lastDay) localStorage.setItem('fw_streak_day',today);
+  localStorage.setItem('fw_streak',streak);
+  return streak;
+}
+function streakMsg(n){
+  if(n===1)  return 'Добро пожаловать! Начни свою серию 💪';
+  if(n<=3)   return 'Хорошее начало! Продолжай 🔥';
+  if(n<=7)   return 'Красавчик, что играешь каждый день!';
+  if(n<=14)  return 'Настоящий чемпион — '+n+' дней подряд! 🏆';
+  if(n<=30)  return 'Невероятно! '+n+' дней подряд! 🚀';
+  return 'Легенда! '+n+' дней подряд! 🌟';
+}
+let currentStreak=initStreak();
+let _streakShown=false;
+function showStreakPopup(){
+  if(_streakShown) return;
+  _streakShown=true;
+  document.getElementById('streak-num').textContent=currentStreak;
+  document.getElementById('streak-msg').textContent=streakMsg(currentStreak);
+  document.getElementById('streak-popup').classList.add('on');
+}
+function closeStreakPopup(){
+  document.getElementById('streak-popup').classList.remove('on');
+}
 
 let sel=[],used=new Set(),found=[],dragging=false,lastCell=-1,checking=false;
 // ══════════════════════════════════════
@@ -2520,6 +2575,9 @@ function themeCSS(t){
     `body.th-${t.id} .dot.on,body.th-${t.id} .sp-fill,body.th-${t.id} #arch-fill{background:${t.sel}!important}`,
     `body.th-${t.id} #wdisplay,body.th-${t.id} .logo,body.th-${t.id} .slvl-ttl,body.th-${t.id} .stat-val,body.th-${t.id} #ms b,body.th-${t.id} .m-title,body.th-${t.id} .ot{color:${t.txt}!important}`,
     `body.th-${t.id} .m-exchange{color:${t.txt}!important;border-color:${t.txt}30!important}`,
+    `body.th-${t.id} #streak-box{background:${t.cell}!important}`,
+    `body.th-${t.id} .streak-msg{color:${t.txt}!important}`,
+    `body.th-${t.id} .streak-days{color:${t.txt}60!important}`,
     `body.th-${t.id} #exch-box{background:${t.cell}!important}`,
     `body.th-${t.id} .exch-ttl{color:${t.txt}!important}`,
     `body.th-${t.id} .exch-sub{color:${t.txt}60!important}`,
@@ -2743,8 +2801,10 @@ function doMenu(){
   document.getElementById('overlay').classList.remove('on');
   document.getElementById('m-cval').textContent=coins;
   document.getElementById('m-crval').textContent=crystals;
+  document.getElementById('m-streak-val').textContent=currentStreak;
   updateSndBtn();
   showScr('smenu');
+  setTimeout(showStreakPopup,300);
 }
 
 function doStats(){
@@ -2979,6 +3039,16 @@ function admReset(){
 }
 </script>
 <!-- ══ ПОПАП ПОКУПКИ ТЕМЫ ═══════════════════════════════════ -->
+<div id="streak-popup">
+  <div id="streak-box">
+    <div class="streak-fire">🔥</div>
+    <div class="streak-num" id="streak-num">1</div>
+    <div class="streak-days">день подряд</div>
+    <div class="streak-msg" id="streak-msg"></div>
+    <button class="streak-ok" onclick="closeStreakPopup()">Продолжить</button>
+  </div>
+</div>
+
 <div id="exch-popup" onclick="if(event.target===this)closeExchPopup()">
   <div id="exch-box">
     <div class="exch-ico">💎</div>
