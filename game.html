@@ -411,6 +411,15 @@ header {
 }
 #wdisplay.dim { color: #505050; font-size: .82rem; letter-spacing: .5px; }
 #wdisplay.warn { color: #606060; font-size: .82rem; letter-spacing: .5px; }
+#toast {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: rgba(30,30,32,0.88); color: #fff;
+  padding: 10px 20px; border-radius: 14px;
+  font-size: .9rem; font-weight: 600; letter-spacing: .5px;
+  pointer-events: none; white-space: nowrap;
+  opacity: 0; transition: opacity .15s; z-index: 10;
+}
+#toast.on { opacity: 1; }
 #toolbar {
   position: fixed; bottom: 60px; left: 0; right: 0;
   display: flex; gap: 8px; justify-content: center;
@@ -1078,7 +1087,7 @@ body.light .adm-inp{background:#d0d0d0;color:#1a1a1c;border-color:#bbb;}
 </div>
 <div id="dots"></div>
 <div id="game-center">
-  <div id="gw"><svg id="svg"></svg><div id="grid"></div></div>
+  <div id="gw"><svg id="svg"></svg><div id="grid"></div><div id="toast"></div></div>
   <!-- Таймер бонуса — под сеткой, над wdisplay -->
   <div id="bonus-timer-wrap">
     <div id="bonus-bar"><div id="bonus-fill"></div></div>
@@ -2024,8 +2033,7 @@ function archiveWord(word){
     },500);
   }
   save();
-  setWord(word+' → архив');
-  setTimeout(()=>setWord(''),1400);
+  showToast(word+' → архив',900);
 }
 function refreshArch(){
   document.getElementById('arch-fill').style.width=(arch/20*100)+'%';
@@ -2103,6 +2111,14 @@ function drawLines(){
 function refreshCells(){document.querySelectorAll('.cell').forEach(d=>{const i=+d.dataset.idx;d.classList.toggle('sel',sel.includes(i)&&!used.has(i));d.classList.toggle('used',used.has(i));});}
 function buildDots(){const el=document.getElementById('dots');el.innerHTML='';CL().words.forEach(()=>{const d=document.createElement('div');d.className='dot';el.appendChild(d);});}
 function refreshDots(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i<found.length));}
+let _toastTmr=null;
+function showToast(txt,ms=900){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  if(_toastTmr){clearTimeout(_toastTmr);_toastTmr=null;}
+  el.textContent=txt;el.classList.add('on');
+  _toastTmr=setTimeout(()=>{el.classList.remove('on');},ms);
+}
 function setWord(txt,cls=''){const el=document.getElementById('wdisplay');el.textContent=txt;el.className=cls?`dim ${cls}`:(txt&&txt.includes('архив')?'':'');}
 
 // ══════════════════════════════════════
@@ -2206,8 +2222,8 @@ function submit(){
     const blocks=remaining.length>0&&remaining.some(rw=>findPathWith(rw,new Set([...used,...path]))===null);
     if(blocks){
       wrongFx();
-      setWord('Попробуй начать с другой буквы','warn');
-      setTimeout(()=>{clearSel();setWord('');},1600);
+      showToast('Попробуй начать с другой буквы',1100);
+      setTimeout(()=>{clearSel();},1100);
       return;
     }
     accept(lw,path);return;
@@ -2237,8 +2253,7 @@ function checkArchive(w){
   if(archSet.has(w)){
     wrongFx();clearSel();
     const el=document.getElementById('wdisplay');
-    el.textContent='Уже находил';el.className='warn';
-    setTimeout(()=>{el.textContent='';el.className='';},1400);
+    showToast('Уже находил',800);
     return;
   }
   // Есть в словаре?
