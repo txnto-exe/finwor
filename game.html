@@ -2255,11 +2255,14 @@ function nextLevel(){
   save();
   document.getElementById('overlay').classList.remove('on');
   _levelsAfterAd++;
-  // Каждые 2 уровня — межуровневая реклама
-  if(_levelsAfterAd >= (lvl <= 25 ? 3 : 2)){
-    _levelsAfterAd = 0;
-    showInterstitialAd();
-    return;
+  // До 10 уровня межуровневая реклама не показывается
+  if(lvl > 10){
+    // Каждые 2 уровня — межуровневая реклама (каждые 3 до уровня 25)
+    if(_levelsAfterAd >= (lvl <= 25 ? 3 : 2)){
+      _levelsAfterAd = 0;
+      showInterstitialAd();
+      return;
+    }
   }
   // Каждые 20 пройденных уровней → кристаллы
   if((wasLvl+1)%20===0){
@@ -2965,7 +2968,14 @@ function admReload(){
 function admReset(){
   if(!confirm('Сбросить весь прогресс? Это необратимо!')) return;
   localStorage.clear();
-  location.reload();
+  // сброс всех переменных состояния без перезагрузки страницы
+  lvl=0; coins=0; arch=0; maxLvl=0; crystals=0;
+  archSet=new Set();
+  sel=[]; used=new Set(); found=[]; dragging=false; lastCell=-1; checking=false;
+  bonusMode=false; bonusTmr&&clearInterval(bonusTmr); bonusTmr=null; bonusSecs=60; bonusFound=new Set();
+  _levelsAfterAd=0; _admInfCoins=false;
+  save();
+  doMenu();
 }
 </script>
 <!-- ══ ПОПАП ПОКУПКИ ТЕМЫ ═══════════════════════════════════ -->
