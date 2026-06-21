@@ -1710,7 +1710,9 @@ let _streakShown=false;
 function showStreakPopup(){
   if(_streakShown) return;
   _streakShown=true;
-  const display = currentStreak===1 ? 0 : currentStreak;
+  const isFirstEver=!localStorage.getItem('fw_was_here');
+  if(isFirstEver) localStorage.setItem('fw_was_here','1');
+  const display=isFirstEver ? 0 : currentStreak;
   document.getElementById('streak-num').textContent=display;
   document.getElementById('streak-days').textContent=display===0?'твой стрик':'день подряд';
   document.getElementById('streak-msg').textContent=streakMsg(display);
@@ -2939,6 +2941,7 @@ history.pushState(null, '', '#');
 let _adminTaps=0,_adminTimer=null,_admInfCoins=false;
 
 function adminTap(){
+  if(!window._devMode) return;
   _adminTaps++;
   clearTimeout(_adminTimer);
   _adminTimer=setTimeout(()=>{_adminTaps=0;},2000);
@@ -3060,7 +3063,7 @@ function admReset(){
   <div id="streak-box">
     <div class="streak-fire">🔥</div>
     <div class="streak-num" id="streak-num">1</div>
-    <div class="streak-days">день подряд</div>
+    <div class="streak-days" id="streak-days">день подряд</div>
     <div class="streak-msg" id="streak-msg"></div>
     <button class="streak-ok" onclick="closeStreakPopup()">Продолжить</button>
   </div>
