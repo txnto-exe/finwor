@@ -2217,7 +2217,7 @@ function submit(){
 }
 function accept(word,cells){
   cells.forEach(i=>used.add(i));found.push(word);
-  saveProgress();
+  if(!bonusMode) saveProgress();
   if(navigator.vibrate)navigator.vibrate([35]);
   sndCorrect();refreshDots();clearSel();
   if(bonusMode){
